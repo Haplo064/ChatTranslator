@@ -295,44 +295,64 @@ namespace ChatTranslator
 
                         if (enable)
                         {
-                            String messageString = message.TextValue;
-                            String predictedLanguage = Lang(messageString);
-                            //PluginLog.Log($"PRED LANG: {predictedLanguage}");
-                            var fmessage = new SeString(new List<Payload>());
-                            fmessage.Append(message);
-
-                            if (predictedLanguage != codes[languageInt])
+                            var run = true;
+                            if (message.Payloads.Count < 2) { }
+                            else if (message.Payloads[0].Type == PayloadType.UIForeground && message.Payloads[1].Type == PayloadType.UIForeground)
                             {
-                                bool rawExists = false;
-                                foreach (Payload payload in message.Payloads)
+                                PluginLog.Log("Caught loop A");
+                                run = false;
+                            }
+
+                            if (run)
+                            {
+                                foreach (Payload pl in message.Payloads)
                                 {
-                                    if (payload.Type == PayloadType.RawText)
+                                    PluginLog.Log($"{pl.Type}");
+                                    if (pl.Type == PayloadType.UIForeground)
                                     {
-                                        rawExists = true;
-                                        break;
+                                        var xx = (UIForegroundPayload)pl;
+                                        PluginLog.Log($"RGB: {xx.RGB}");
                                     }
                                 }
-                                if (rawExists)
+                                String messageString = message.TextValue;
+                                String predictedLanguage = Lang(messageString);
+                                PluginLog.Log($"PRED LANG: {predictedLanguage}");
+                                var fmessage = new SeString(new List<Payload>());
+                                fmessage.Append(message);
+
+                                if (predictedLanguage != codes[languageInt])
                                 {
-                                    if (tranMode != 2) //Replace or append
+                                    bool rawExists = false;
+                                    foreach (Payload payload in message.Payloads)
                                     {
-                                        isHandled = true;
-                                    }
-                                    Task.Run(() =>
-                                    {
-                                        if (!Tran(type, messageString, fmessage, PName))
+                                        if (payload.Type == PayloadType.RawText)
                                         {
-                                            tempHandled = false;
-                                        };
-                                    });
-                                    isHandled = tempHandled;
+                                            rawExists = true;
+                                            break;
+                                        }
+                                    }
+                                    if (rawExists)
+                                    {
+                                        if (tranMode != 2) // is it Replace (1) or append (0)
+                                        {
+                                            isHandled = true;
+                                        }
+                                        var t = Task.Run(() =>
+                                        {
+                                            if (!Tran(type, messageString, fmessage, PName))
+                                            {
+                                                PluginLog.Log("FALSE so printChat");
+                                                fmessage.Payloads.Insert(0, new UIForegroundPayload(pluginInterface.Data, 0));
+                                                fmessage.Payloads.Insert(0, new UIForegroundPayload(pluginInterface.Data, 999));
+                                                PrintChat(type, PName, fmessage);
+                                            };
+                                        });
+
+                                    }
                                 }
                             }
                         }
                     }
-                    //List<Payload> payloads = message.Payloads;
-
-
                 }
             }
             catch (Exception e)
@@ -347,8 +367,15 @@ namespace ChatTranslator
             var fmessage = new SeString(new List<Payload>());
             fmessage.Append(messageSeString);
 
-            string output = Translate(messageString);
-            if (output != "LOOP")
+            var run = true;
+            if (messageSeString.Payloads.Count < 2) { }
+            else if (messageSeString.Payloads[0] == new UIForegroundPayload(pluginInterface.Data, 999) && messageSeString.Payloads[1] == new UIForegroundPayload(pluginInterface.Data, 0))
+            {
+                PluginLog.Log("Caught loop B");
+                run = false;
+            }
+
+            if (run)
             {
                 bool tdone = false;
                 for (int i = 0; i < messageSeString.Payloads.Count; i++)
@@ -392,13 +419,19 @@ namespace ChatTranslator
                     if (tranMode == 0) // Append
                     {
                         var tmessage = new SeString(new List<Payload>());
+
                         tmessage.Payloads.Add(new TextPayload(" | "));
+                        fmessage.Payloads.Insert(0, new UIForegroundPayload(pluginInterface.Data, 0));
+                        fmessage.Payloads.Insert(0, new UIForegroundPayload(pluginInterface.Data, 999));
                         fmessage.Append(tmessage);
                         fmessage.Append(messageSeString);
                         PrintChat(type, senderName, fmessage);
+                        return true;
                     }
-                    else //Default new message
+                    else // Replace or Additional
                     {
+                        messageSeString.Payloads.Insert(0, new UIForegroundPayload(pluginInterface.Data, 0));
+                        messageSeString.Payloads.Insert(0, new UIForegroundPayload(pluginInterface.Data, 999));
                         PrintChat(type, senderName, messageSeString);
                         return true;
                     }
