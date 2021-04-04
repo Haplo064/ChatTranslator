@@ -403,10 +403,17 @@ namespace ChatTranslator
                         var translatedText = Translate(text.Text);
                         if (translatedText != "LOOP")
                         {
+                            //TODO: Fix Colour bleed (get old colour and use that?)
                             messageSeString.Payloads[i] = new TextPayload(translatedText);
                             messageSeString.Payloads.Insert(i, new UIForegroundPayload(pluginInterface.Data, (ushort)textColour[0].Option));
-                            if (i + 2 < messageSeString.Payloads.Count) { messageSeString.Payloads.Insert(i + 2, new UIForegroundPayload(pluginInterface.Data, 0)); }
-                            else { messageSeString.Payloads.Append(new UIForegroundPayload(pluginInterface.Data, 0)); }
+                            if (i + 2 < messageSeString.Payloads.Count)
+                            {
+                                messageSeString.Payloads.Insert(i + 2, new UIForegroundPayload(pluginInterface.Data, 0));
+                            }
+                            else
+                            {
+                                messageSeString.Payloads.Append(new UIForegroundPayload(pluginInterface.Data, 0));
+                            }
                             i++;
                             i++;
                             tdone = true;
