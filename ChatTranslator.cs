@@ -10,67 +10,73 @@
 // Send all translations to USER DEFINED CHANNEL (optional)
 // Option to only translate one language
 
-using System;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using Dalamud.Configuration;
 using Dalamud.Game.Chat;
-using Dalamud.Game.Chat.SeStringHandling;
-using Dalamud.Game.Chat.SeStringHandling.Payloads;
 using Dalamud.Game.Command;
-using Dalamud.Hooking;
 using Dalamud.Plugin;
-using IvanAkcheurov.NTextCat.Lib;
-using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
-using System.IO;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using Num = System.Numerics;
-using System.Reflection;
-using System.Collections.Concurrent;
-using System.Net;
-using System.Net.Http;
-using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
 
 namespace ChatTranslator
 {
-    public class ChatTranslator : UI, IDalamudPlugin
+    public partial class ChatTranslator : IDalamudPlugin
     {
-        public UI ui;
-        public Translater translater;
-        public OnChat onChat;
-
         public string Name => "Chat Translator";
         public DalamudPluginInterface pluginInterface;
         public Config Configuration;
         public bool enable = true;
-        public bool config = false;
+        public bool config;
         public string language = "en";
         public int languageInt = 16;
         public UIColorPick[] textColour;
         public UIColorPick chooser;
         public bool picker;
-        public int tranMode = 0;
+        public int tranMode;
         public string[] tranModeOptions = { "Append", "Replace", "Additional" };
-
-
         public Lumina.Excel.ExcelSheet<UIColor> uiColours;
-
         public List<XivChatType> _channels = new List<XivChatType>();
-
         public List<XivChatType> order = new List<XivChatType>
         {
-            XivChatType.None, XivChatType.Debug, XivChatType.Urgent, XivChatType.Notice, XivChatType.Say,
-            XivChatType.Shout, XivChatType.TellOutgoing, XivChatType.TellIncoming, XivChatType.Party, XivChatType.Alliance,
-            XivChatType.Ls1, XivChatType.Ls2, XivChatType.Ls3, XivChatType.Ls4, XivChatType.Ls5,
-            XivChatType.Ls6, XivChatType.Ls7, XivChatType.Ls8, XivChatType.FreeCompany, XivChatType.NoviceNetwork,
-            XivChatType.CustomEmote, XivChatType.StandardEmote, XivChatType.Yell, XivChatType.CrossParty, XivChatType.PvPTeam,
-            XivChatType.CrossLinkShell1, XivChatType.Echo, XivChatType.SystemMessage, XivChatType.SystemError, XivChatType.GatheringSystemMessage,
-            XivChatType.ErrorMessage, XivChatType.RetainerSale, XivChatType.CrossLinkShell2, XivChatType.CrossLinkShell3, XivChatType.CrossLinkShell4,
-            XivChatType.CrossLinkShell5, XivChatType.CrossLinkShell6, XivChatType.CrossLinkShell7, XivChatType.CrossLinkShell8
+            XivChatType.None,
+            XivChatType.Debug,
+            XivChatType.Urgent,
+            XivChatType.Notice,
+            XivChatType.Say,
+            XivChatType.Shout,
+            XivChatType.TellOutgoing,
+            XivChatType.TellIncoming,
+            XivChatType.Party,
+            XivChatType.Alliance,
+            XivChatType.Ls1,
+            XivChatType.Ls2,
+            XivChatType.Ls3,
+            XivChatType.Ls4,
+            XivChatType.Ls5,
+            XivChatType.Ls6,
+            XivChatType.Ls7,
+            XivChatType.Ls8,
+            XivChatType.FreeCompany,
+            XivChatType.NoviceNetwork,
+            XivChatType.CustomEmote,
+            XivChatType.StandardEmote,
+            XivChatType.Yell,
+            XivChatType.CrossParty,
+            XivChatType.PvPTeam,
+            XivChatType.CrossLinkShell1,
+            XivChatType.Echo,
+            XivChatType.SystemMessage,
+            XivChatType.SystemError,
+            XivChatType.GatheringSystemMessage,
+            XivChatType.ErrorMessage,
+            XivChatType.RetainerSale,
+            XivChatType.CrossLinkShell2,
+            XivChatType.CrossLinkShell3,
+            XivChatType.CrossLinkShell4,
+            XivChatType.CrossLinkShell5,
+            XivChatType.CrossLinkShell6,
+            XivChatType.CrossLinkShell7,
+            XivChatType.CrossLinkShell8
         };
 
         public bool[] yesno = {
@@ -124,15 +130,13 @@ namespace ChatTranslator
             "Chinese Classical", "Chinese yue"
         };
 
-
-
-
         public void Initialize(DalamudPluginInterface pluginInterface)
         {
+
             this.pluginInterface = pluginInterface;
             Configuration = pluginInterface.GetPluginConfig() as Config ?? new Config();
-            this.pluginInterface.Framework.Gui.Chat.OnChatMessage += onChat.Chat_OnChatMessage;
-            this.pluginInterface.UiBuilder.OnBuildUi += ui.TranslatorConfigUI;
+            this.pluginInterface.Framework.Gui.Chat.OnChatMessage += Chat_OnChatMessage;
+            this.pluginInterface.UiBuilder.OnBuildUi += TranslatorConfigUI;
             this.pluginInterface.UiBuilder.OnOpenConfigUi += TranslatorConfig;
             this.pluginInterface.CommandManager.AddHandler("/trn", new CommandInfo(Command)
             {
@@ -143,35 +147,24 @@ namespace ChatTranslator
             textColour = Configuration.TextColour;
             languageInt = Configuration.Lang;
         }
+
         public class PluginConfiguration : IPluginConfiguration
         {
             public int Version { get; set; } = 0;
         }
+
         public void Dispose()
         {
-            pluginInterface.Framework.Gui.Chat.OnChatMessage -= onChat.Chat_OnChatMessage;
+            pluginInterface.Framework.Gui.Chat.OnChatMessage -= Chat_OnChatMessage;
             pluginInterface.UiBuilder.OnBuildUi -= TranslatorConfigUI;
             pluginInterface.UiBuilder.OnOpenConfigUi -= TranslatorConfig;
             pluginInterface.CommandManager.RemoveHandler("/trn");
         }
-        private void Command(string command, string arguments) => config = true;
+
+        void Command(string command, string arguments) => config = true;
 
         // What to do when plugin install config button is pressed
-        private void TranslatorConfig(object Sender, EventArgs args) => config = true;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        void TranslatorConfig(object Sender, EventArgs args) => config = true;
     }
 
     public class UIColorPick

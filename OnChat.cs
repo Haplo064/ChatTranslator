@@ -1,36 +1,16 @@
 ﻿using System;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using Dalamud.Configuration;
 using Dalamud.Game.Chat;
 using Dalamud.Game.Chat.SeStringHandling;
 using Dalamud.Game.Chat.SeStringHandling.Payloads;
-using Dalamud.Game.Command;
-using Dalamud.Hooking;
 using Dalamud.Plugin;
-using IvanAkcheurov.NTextCat.Lib;
-using ImGuiNET;
-using Lumina.Excel.GeneratedSheets;
-using System.IO;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using Num = System.Numerics;
-using System.Reflection;
-using System.Collections.Concurrent;
-using System.Net;
-using System.Net.Http;
-using Newtonsoft.Json.Linq;
-using ChatTranslator;
 
 namespace ChatTranslator
 {
-    public class OnChat
+    public partial class ChatTranslator
     {
-        public ChatTranslator trn;
-        public Translater translater;
-        public Handy handy;
+
         public void Chat_OnChatMessage(XivChatType type, uint senderId, ref SeString sender, ref SeString message, ref bool isHandled)
         {
             try
@@ -38,9 +18,9 @@ namespace ChatTranslator
                 bool tempHandled = isHandled;
                 if (!isHandled)
                 {
-                    if (trn._channels.Contains(type))
+                    if (_channels.Contains(type))
                     {
-                        string PName = trn.pluginInterface.ClientState.LocalPlayer.Name;
+                        string PName = pluginInterface.ClientState.LocalPlayer.Name;
                         if (sender.Payloads.Count > 0)
                         {
                             if (sender.Payloads[0].Type == PayloadType.Player)
@@ -63,7 +43,7 @@ namespace ChatTranslator
                             }
                         }
 
-                        if (trn.enable)
+                        if (enable)
                         {
                             var run = true;
                             if (message.Payloads.Count < 2) { }
@@ -85,12 +65,12 @@ namespace ChatTranslator
                                     }
                                 }
                                 String messageString = message.TextValue;
-                                String predictedLanguage = translater.Lang(messageString);
+                                String predictedLanguage = Lang(messageString);
                                 PluginLog.Log($"PRED LANG: {predictedLanguage}");
                                 var fmessage = new SeString(new List<Payload>());
                                 fmessage.Append(message);
 
-                                if (predictedLanguage != trn.codes[trn.languageInt])
+                                if (predictedLanguage != codes[languageInt])
                                 {
                                     bool rawExists = false;
                                     foreach (Payload payload in message.Payloads)
@@ -103,21 +83,20 @@ namespace ChatTranslator
                                     }
                                     if (rawExists)
                                     {
-                                        if (trn.tranMode != 2) // is it Replace (1) or append (0)
+                                        if (tranMode != 2) // is it Replace (1) or append (0)
                                         {
                                             isHandled = true;
                                         }
                                         var t = Task.Run(() =>
                                         {
-                                            if (!translater.Tran(type, messageString, fmessage, PName))
+                                            if (!Tran(type, fmessage, PName))
                                             {
                                                 PluginLog.Log("FALSE so printChat");
-                                                fmessage.Payloads.Insert(0, new UIForegroundPayload(trn.pluginInterface.Data, 0));
-                                                fmessage.Payloads.Insert(0, new UIForegroundPayload(trn.pluginInterface.Data, 48));
-                                                handy.PrintChat(type, PName, fmessage);
+                                                fmessage.Payloads.Insert(0, new UIForegroundPayload(pluginInterface.Data, 0));
+                                                fmessage.Payloads.Insert(0, new UIForegroundPayload(pluginInterface.Data, 48));
+                                                PrintChat(type, PName, fmessage);
                                             };
                                         });
-
                                     }
                                 }
                             }
