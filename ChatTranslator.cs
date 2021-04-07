@@ -2,13 +2,12 @@
 // Allow for echo channel -- DONE
 // Single colour option for translated text -- DONE
 // Fix not loading language selection -- DONE
-
-// Append Translation (optional) -- TEST
-// Replace with Translation (optional) -- TEST
-// Fix colour 'bleeding' into next line - TEST
+// Append Translation (optional) -- DONE
+// Replace with Translation (optional) -- DONE
+// Fix colour 'bleeding' into next line - DONE
 
 // Send all translations to USER DEFINED CHANNEL (optional)
-// Option to only translate one language
+// Option to only translate defined language(s)
 
 using Dalamud.Configuration;
 using Dalamud.Game.Chat;
@@ -29,12 +28,16 @@ namespace ChatTranslator
         public bool config;
         public string language = "en";
         public int languageInt = 16;
+        public int languageInt2 = 0;
         public UIColorPick[] textColour;
         public UIColorPick chooser;
         public bool picker;
         public int tranMode;
         public string[] tranModeOptions = { "Append", "Replace", "Additional" };
         public Lumina.Excel.ExcelSheet<UIColor> uiColours;
+        public bool notself;
+        public bool whitelist;
+        public List<int> chosenLanguages;
         public List<XivChatType> _channels = new List<XivChatType>();
         public List<XivChatType> order = new List<XivChatType>
         {
@@ -146,6 +149,9 @@ namespace ChatTranslator
             _channels = Configuration.Channels;
             textColour = Configuration.TextColour;
             languageInt = Configuration.Lang;
+            whitelist = Configuration.Whitelist;
+            notself = Configuration.NotSelf;
+            chosenLanguages = Configuration.ChosenLanguages;
         }
 
         public class PluginConfiguration : IPluginConfiguration
@@ -182,5 +188,8 @@ namespace ChatTranslator
         {
             new UIColorPick { Choice = 0, Option =0 }
         };
+        public bool NotSelf { get; set; } = false;
+        public bool Whitelist { get; set; } = false;
+        public List<int> ChosenLanguages { get; set; } = new List<int>();
     }
 }

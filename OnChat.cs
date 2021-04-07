@@ -70,7 +70,14 @@ namespace ChatTranslator
                                 var fmessage = new SeString(new List<Payload>());
                                 fmessage.Append(message);
 
-                                if (predictedLanguage != codes[languageInt])
+                                var yes = true;
+                                var pos = Array.IndexOf(codes, predictedLanguage);
+                                if (whitelist && !chosenLanguages.Contains(pos))
+                                { yes = false; }
+                                if (notself && pluginInterface.ClientState.LocalPlayer.Name == PName)
+                                { yes = false; }
+
+                                if (predictedLanguage != codes[languageInt] && yes)
                                 {
                                     bool rawExists = false;
                                     foreach (Payload payload in message.Payloads)

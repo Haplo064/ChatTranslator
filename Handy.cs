@@ -11,6 +11,9 @@ namespace ChatTranslator
         {
             Configuration.Lang = languageInt;
             Configuration.Channels = _channels;
+            Configuration.NotSelf = notself;
+            Configuration.Whitelist = whitelist;
+            Configuration.ChosenLanguages = chosenLanguages;
             pluginInterface.SavePluginConfig(Configuration);
         }
 
