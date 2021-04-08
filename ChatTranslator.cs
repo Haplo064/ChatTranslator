@@ -24,26 +24,25 @@ namespace ChatTranslator
     public partial class ChatTranslator : IDalamudPlugin
     {
         public string Name => "Chat Translator";
-        public DalamudPluginInterface pluginInterface;
-        public Config Configuration;
-        public bool enable = true;
-        public bool config;
-        public string language = "en";
-        public int languageInt = 16;
-        public int languageInt2 = 0;
-        public UIColorPick[] textColour;
-        public UIColorPick chooser;
-        public bool picker;
-        public int tranMode;
-        public int oneInt;
-        public bool oneChan;
-        public string[] tranModeOptions = { "Append", "Replace", "Additional" };
-        public Lumina.Excel.ExcelSheet<UIColor> uiColours;
-        public bool notself;
-        public bool whitelist;
-        public List<int> chosenLanguages;
-        public List<XivChatType> _channels = new List<XivChatType>();
-        public List<XivChatType> order = new List<XivChatType>
+        private DalamudPluginInterface _pluginInterface;
+        private Config _configuration;
+        private bool _config;
+        private int _languageInt = 16;
+        private int _languageInt2;
+        private UiColorPick[] _textColour;
+        private UiColorPick _chooser;
+        private bool _picker;
+        private int _tranMode;
+        private int _oneInt;
+        private bool _oneChan;
+        private readonly string[] _tranModeOptions = { "Append", "Replace", "Additional" };
+        private Lumina.Excel.ExcelSheet<UIColor> _uiColours;
+        private bool _notself;
+        private bool _whitelist;
+        private List<int> _chosenLanguages;
+        private List<XivChatType> _channels = new List<XivChatType>();
+
+        private readonly List<XivChatType> _order = new List<XivChatType>
         {
             XivChatType.None,
             XivChatType.Debug,
@@ -85,7 +84,8 @@ namespace ChatTranslator
             XivChatType.CrossLinkShell7,
             XivChatType.CrossLinkShell8
         };
-        public string[] orderString =
+
+        private readonly string[] _orderString =
         {
             "None",
             "Debug",
@@ -128,7 +128,7 @@ namespace ChatTranslator
             "CrossLinkShell8"
         };
 
-        public bool[] yesno = {
+        private readonly bool[] _yesno = {
             false, false, false, false, true,
             true, false, true, true, true,
             true, true, true, true, true,
@@ -139,7 +139,7 @@ namespace ChatTranslator
             true, true, true, true
         };
 
-        public string[] codes = {
+        private readonly string[] _codes = {
             "af", "an", "ar", "az", "be_x_old",
             "bg", "bn", "br", "bs",
             "ca", "ceb", "cs", "cy", "da",
@@ -159,7 +159,7 @@ namespace ChatTranslator
             "zh_classical", "zh_yue"
         };
 
-        public string[] languages = {
+        private readonly string[] _languages = {
             "Afrikaans", "Aragonese", "Arabic", "Azerbaijani", "Belarusian",
             "Bulgarian", "Bengali", "Breton", "Bosnian",
             "Catalan; Valencian", "Cebuano", "Czech", "Welsh", "Danish",
@@ -182,44 +182,41 @@ namespace ChatTranslator
         public void Initialize(DalamudPluginInterface pluginInterface)
         {
 
-            this.pluginInterface = pluginInterface;
-            Configuration = pluginInterface.GetPluginConfig() as Config ?? new Config();
-            this.pluginInterface.Framework.Gui.Chat.OnChatMessage += Chat_OnChatMessage;
-            this.pluginInterface.UiBuilder.OnBuildUi += TranslatorConfigUI;
-            this.pluginInterface.UiBuilder.OnOpenConfigUi += TranslatorConfig;
-            this.pluginInterface.CommandManager.AddHandler("/trn", new CommandInfo(Command)
+            this._pluginInterface = pluginInterface;
+            _configuration = pluginInterface.GetPluginConfig() as Config ?? new Config();
+            this._pluginInterface.Framework.Gui.Chat.OnChatMessage += Chat_OnChatMessage;
+            this._pluginInterface.UiBuilder.OnBuildUi += TranslatorConfigUi;
+            this._pluginInterface.UiBuilder.OnOpenConfigUi += TranslatorConfig;
+            this._pluginInterface.CommandManager.AddHandler("/trn", new CommandInfo(Command)
             {
                 HelpMessage = "Opens the Chat Translator config menu"
             });
-            uiColours = pluginInterface.Data.Excel.GetSheet<UIColor>();
-            _channels = Configuration.Channels;
-            textColour = Configuration.TextColour;
-            languageInt = Configuration.Lang;
-            whitelist = Configuration.Whitelist;
-            notself = Configuration.NotSelf;
-            chosenLanguages = Configuration.ChosenLanguages;
+            _uiColours = pluginInterface.Data.Excel.GetSheet<UIColor>();
+            _channels = _configuration.Channels;
+            _textColour = _configuration.TextColour;
+            _languageInt = _configuration.Lang;
+            _whitelist = _configuration.Whitelist;
+            _notself = _configuration.NotSelf;
+            _oneChan = _configuration.OneChan;
+            _oneInt = _configuration.OneInt;
+            _chosenLanguages = _configuration.ChosenLanguages;
         }
-
-        public class PluginConfiguration : IPluginConfiguration
-        {
-            public int Version { get; set; } = 0;
-        }
-
+        
         public void Dispose()
         {
-            pluginInterface.Framework.Gui.Chat.OnChatMessage -= Chat_OnChatMessage;
-            pluginInterface.UiBuilder.OnBuildUi -= TranslatorConfigUI;
-            pluginInterface.UiBuilder.OnOpenConfigUi -= TranslatorConfig;
-            pluginInterface.CommandManager.RemoveHandler("/trn");
+            _pluginInterface.Framework.Gui.Chat.OnChatMessage -= Chat_OnChatMessage;
+            _pluginInterface.UiBuilder.OnBuildUi -= TranslatorConfigUi;
+            _pluginInterface.UiBuilder.OnOpenConfigUi -= TranslatorConfig;
+            _pluginInterface.CommandManager.RemoveHandler("/trn");
         }
 
-        void Command(string command, string arguments) => config = true;
+        private void Command(string command, string arguments) => _config = true;
 
         // What to do when plugin install config button is pressed
-        void TranslatorConfig(object Sender, EventArgs args) => config = true;
+        private void TranslatorConfig(object sender, EventArgs args) => _config = true;
     }
 
-    public class UIColorPick
+    public class UiColorPick
     {
         public uint Choice { get; set; }
         public uint Option { get; set; }
@@ -230,14 +227,14 @@ namespace ChatTranslator
         public int Version { get; set; } = 0;
         public List<XivChatType> Channels { get; set; } = new List<XivChatType>();
         public int Lang { get; set; } = 16;
-        public UIColorPick[] TextColour { get; set; } =
+        public UiColorPick[] TextColour { get; set; } =
         {
-            new UIColorPick { Choice = 0, Option =0 }
+            new UiColorPick { Choice = 0, Option =0 }
         };
-        public bool NotSelf { get; set; } = false;
-        public bool Whitelist { get; set; } = false;
+        public bool NotSelf { get; set; }
+        public bool Whitelist { get; set; }
         public List<int> ChosenLanguages { get; set; } = new List<int>();
-        public bool OneChan { get; set; } = false;
-        public int OneInt { get; set; } = 0;
+        public bool OneChan { get; set; }
+        public int OneInt { get; set; }
     }
 }

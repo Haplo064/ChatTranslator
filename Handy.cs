@@ -7,19 +7,20 @@ namespace ChatTranslator
 {
     public partial class ChatTranslator
     {
-        public void SaveConfig()
+        private void SaveConfig()
         {
-            Configuration.Lang = languageInt;
-            Configuration.Channels = _channels;
-            Configuration.NotSelf = notself;
-            Configuration.Whitelist = whitelist;
-            Configuration.ChosenLanguages = chosenLanguages;
-            Configuration.OneChan = oneChan;
-            Configuration.OneInt = oneInt;
-            pluginInterface.SavePluginConfig(Configuration);
+            _configuration.Lang = _languageInt;
+            _configuration.Channels = _channels;
+            _configuration.NotSelf = _notself;
+            _configuration.Whitelist = _whitelist;
+            _configuration.ChosenLanguages = _chosenLanguages;
+            _configuration.OneChan = _oneChan;
+            _configuration.OneInt = _oneInt;
+            _configuration.TextColour = _textColour;
+            _pluginInterface.SavePluginConfig(_configuration);
         }
 
-        public void PrintChat(XivChatType type, string senderName, SeString messageSeString)
+        private void PrintChat(XivChatType type, string senderName, SeString messageSeString)
         {
             var chat = new XivChatEntry
             {
@@ -28,21 +29,19 @@ namespace ChatTranslator
                 MessageBytes = messageSeString.Encode()
             };
 
-            pluginInterface.Framework.Gui.Chat.PrintChat(chat);
+            _pluginInterface.Framework.Gui.Chat.PrintChat(chat);
         }
 
         public void PrintChatToLog(SeString debugMe)
         {
             PluginLog.Log("=================");
             PluginLog.Log($"{debugMe.TextValue}");
-            foreach (Payload pl in debugMe.Payloads)
+            foreach (var pl in debugMe.Payloads)
             {
                 PluginLog.Log($"TYPE: {pl.Type}");
-                if (pl.Type == PayloadType.UIForeground)
-                {
-                    var pl2 = (UIForegroundPayload)pl;
-                    PluginLog.Log($"--COL:{pl2.UIColor.UIForeground}");
-                }
+                if (pl.Type != PayloadType.UIForeground) continue;
+                var pl2 = (UIForegroundPayload)pl;
+                PluginLog.Log($"--COL:{pl2.UIColor.UIForeground}");
 
             }
 

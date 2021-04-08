@@ -1,9 +1,5 @@
 .vs/
 bin/
 obj/
-obj/Debug/ChatTranslator.csprojAssemblyReference.cache
-obj/Debug/ChatTranslator.dll
-obj/Debug/ChatTranslator.pdb
-bin/Debug/ChatTranslator.pdb
-bin/Debug/ChatTranslator.dll
-.vs/ChatTranslator/v16/.suo
+.idea/
+
