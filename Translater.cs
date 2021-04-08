@@ -84,12 +84,12 @@ namespace ChatTranslator
                     i += 7;
                     continue;
                 }
-                else if (messageSeString.Payloads[i].Type == PayloadType.Player)
+                if (messageSeString.Payloads[i].Type == PayloadType.Player)
                 {
                     i += 2;
                     continue;
                 }
-                else if (messageSeString.Payloads[i].Type == PayloadType.Status)
+                if (messageSeString.Payloads[i].Type == PayloadType.Status)
                 {
                     i += 10;
                     continue;
