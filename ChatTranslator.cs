@@ -5,12 +5,14 @@
 // Append Translation (optional) -- DONE
 // Replace with Translation (optional) -- DONE
 // Fix colour 'bleeding' into next line - DONE
+// Option to only translate defined language(s) - DONE
+// Send all translations to USER DEFINED CHANNEL (optional) - DONE
 
-// Send all translations to USER DEFINED CHANNEL (optional)
-// Option to only translate defined language(s)
+//Create a blacklist of things to not translate (string array)
+//Also have a rolling list of past translations, to add easily?
 
 using Dalamud.Configuration;
-using Dalamud.Game.Chat;
+using Dalamud.Game.Text;
 using Dalamud.Game.Command;
 using Dalamud.Plugin;
 using Lumina.Excel.GeneratedSheets;
@@ -33,6 +35,8 @@ namespace ChatTranslator
         public UIColorPick chooser;
         public bool picker;
         public int tranMode;
+        public int oneInt;
+        public bool oneChan;
         public string[] tranModeOptions = { "Append", "Replace", "Additional" };
         public Lumina.Excel.ExcelSheet<UIColor> uiColours;
         public bool notself;
@@ -80,6 +84,48 @@ namespace ChatTranslator
             XivChatType.CrossLinkShell6,
             XivChatType.CrossLinkShell7,
             XivChatType.CrossLinkShell8
+        };
+        public string[] orderString =
+        {
+            "None",
+            "Debug",
+            "Urgent",
+            "Notice",
+            "Say",
+            "Shout",
+            "TellOutgoing",
+            "TellIncoming",
+            "Party",
+            "Alliance",
+            "Ls1",
+            "Ls2",
+            "Ls3",
+            "Ls4",
+            "Ls5",
+            "Ls6",
+            "Ls7",
+            "Ls8",
+            "FreeCompany",
+            "NoviceNetwork",
+            "CustomEmote",
+            "StandardEmote",
+            "Yell",
+            "CrossParty",
+            "PvPTeam",
+            "CrossLinkShell1",
+            "Echo",
+            "SystemMessage",
+            "SystemError",
+            "GatheringSystemMessage",
+            "ErrorMessage",
+            "RetainerSale",
+            "CrossLinkShell2",
+            "CrossLinkShell3",
+            "CrossLinkShell4",
+            "CrossLinkShell5",
+            "CrossLinkShell6",
+            "CrossLinkShell7",
+            "CrossLinkShell8"
         };
 
         public bool[] yesno = {
@@ -191,5 +237,7 @@ namespace ChatTranslator
         public bool NotSelf { get; set; } = false;
         public bool Whitelist { get; set; } = false;
         public List<int> ChosenLanguages { get; set; } = new List<int>();
+        public bool OneChan { get; set; } = false;
+        public int OneInt { get; set; } = 0;
     }
 }

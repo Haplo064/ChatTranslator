@@ -1,6 +1,6 @@
-﻿using Dalamud.Game.Chat;
-using Dalamud.Game.Chat.SeStringHandling;
-using Dalamud.Game.Chat.SeStringHandling.Payloads;
+﻿using Dalamud.Game.Text;
+using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Plugin;
 
 namespace ChatTranslator
@@ -14,6 +14,8 @@ namespace ChatTranslator
             Configuration.NotSelf = notself;
             Configuration.Whitelist = whitelist;
             Configuration.ChosenLanguages = chosenLanguages;
+            Configuration.OneChan = oneChan;
+            Configuration.OneInt = oneInt;
             pluginInterface.SavePluginConfig(Configuration);
         }
 

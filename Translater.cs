@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using Dalamud.Game.Chat;
-using Dalamud.Game.Chat.SeStringHandling;
-using Dalamud.Game.Chat.SeStringHandling.Payloads;
+using Dalamud.Game.Text;
+using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Plugin;
 using IvanAkcheurov.NTextCat.Lib;
 using System.IO;
@@ -128,7 +128,10 @@ namespace ChatTranslator
                     {
                         messageSeString.Payloads.Insert(0, new UIForegroundPayload(pluginInterface.Data, 0));
                         messageSeString.Payloads.Insert(0, new UIForegroundPayload(pluginInterface.Data, 48));
-                        PrintChat(type, senderName, messageSeString);
+                        if (oneChan && tranMode == 2)
+                        { PrintChat(order[oneInt], senderName, messageSeString); }
+                        else { PrintChat(type, senderName, messageSeString); }
+
                         return true;
                     }
                 }

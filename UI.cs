@@ -1,5 +1,5 @@
 ﻿using System;
-using Dalamud.Game.Chat;
+using Dalamud.Game.Text;
 using ImGuiNET;
 using Num = System.Numerics;
 
@@ -44,6 +44,19 @@ namespace ChatTranslator
                 ImGui.Checkbox("Exclude self", ref notself);
                 ImGui.SameLine();
                 ImGui.Text("(?)"); if (ImGui.IsItemHovered()) { ImGui.SetTooltip("Do not translate your own text."); }
+
+                ImGui.Checkbox("Send Translations to one channel", ref oneChan);
+
+                if (oneChan)
+                {
+                    if (ImGui.Combo("Channel", ref oneInt, orderString, orderString.Length))
+                    {
+                        tranMode = 2;
+                        SaveConfig();
+                    }
+                }
+                ImGui.Text("(?)"); if (ImGui.IsItemHovered()) { ImGui.SetTooltip("Only works for the 'Additional' mode.'"); }
+                ImGui.Separator();
                 ImGui.Checkbox("Whitelist", ref whitelist);
                 ImGui.SameLine();
                 ImGui.Text("(?)"); if (ImGui.IsItemHovered()) { ImGui.SetTooltip("Only translate languages detected in specific languages"); }
