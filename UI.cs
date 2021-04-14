@@ -164,6 +164,18 @@ namespace ChatTranslator
                     SaveConfig();
                     _config = false;
                 }
+
+                ImGui.SameLine();
+                ImGui.PushStyleColor(ImGuiCol.Button, 0xFF000000 | 0x005E5BFF);
+                ImGui.PushStyleColor(ImGuiCol.ButtonActive, 0xDD000000 | 0x005E5BFF);
+                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, 0xAA000000 | 0x005E5BFF);
+
+                if (ImGui.Button("Buy Haplo a Hot Chocolate"))
+                {
+                    System.Diagnostics.Process.Start("https://ko-fi.com/haplo");
+                }
+                ImGui.PopStyleColor(3);
+                
                 ImGui.End();
             }
 
