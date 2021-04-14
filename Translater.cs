@@ -61,8 +61,10 @@ namespace ChatTranslator
 
         private bool Tran(XivChatType type, SeString messageSeString, string senderName)
         {
-            var fmessage = new SeString(new List<Payload>());
-            fmessage.Append(messageSeString);
+            var cleanMessage = new SeString(new List<Payload>());
+            cleanMessage.Append(messageSeString);
+            var originalMessage = new SeString(new List<Payload>());
+            originalMessage.Append(messageSeString);
 
             var run = true;
             if (messageSeString.Payloads.Count < 2) { }
@@ -73,7 +75,7 @@ namespace ChatTranslator
             }
 
             if (!run) return false;
-            var tdone = false;
+            var tranDone = false;
 
             for (var i = 0; i < messageSeString.Payloads.Count; i++)
             {
@@ -109,19 +111,23 @@ namespace ChatTranslator
                 else
                     messageSeString.Payloads.Append(new UIForegroundPayload(_pluginInterface.Data, 0));
                 i += 2;
-                tdone = true;
+                tranDone = true;
             }
 
-            if (!tdone) return false;
+            if (!tranDone) return false;
+            // Adding to the rolling "last translation" list
+            _lastTranslations.Insert(0,cleanMessage.TextValue);
+            if(_lastTranslations.Count > 10) _lastTranslations.RemoveAt(10);
+            
             if (_tranMode == 0) // Append
             {
-                var tmessage = new SeString(new List<Payload>());
-                tmessage.Payloads.Add(new TextPayload(" | "));
-                fmessage.Payloads.Insert(0, new UIForegroundPayload(_pluginInterface.Data, 0));
-                fmessage.Payloads.Insert(0, new UIForegroundPayload(_pluginInterface.Data, 48));
-                fmessage.Append(tmessage);
-                fmessage.Append(messageSeString);
-                PrintChat(type, senderName, fmessage);
+                var tranMessage = new SeString(new List<Payload>());
+                tranMessage.Payloads.Add(new TextPayload(" | "));
+                originalMessage.Payloads.Insert(0, new UIForegroundPayload(_pluginInterface.Data, 0));
+                originalMessage.Payloads.Insert(0, new UIForegroundPayload(_pluginInterface.Data, 48));
+                originalMessage.Append(tranMessage);
+                originalMessage.Append(messageSeString);
+                PrintChat(type, senderName, originalMessage);
                 return true;
             }
             else // Replace or Additional

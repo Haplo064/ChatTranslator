@@ -11,12 +11,14 @@ namespace ChatTranslator
         {
             _configuration.Lang = _languageInt;
             _configuration.Channels = _channels;
-            _configuration.NotSelf = _notself;
+            _configuration.NotSelf = _notSelf;
             _configuration.Whitelist = _whitelist;
             _configuration.ChosenLanguages = _chosenLanguages;
             _configuration.OneChan = _oneChan;
             _configuration.OneInt = _oneInt;
             _configuration.TextColour = _textColour;
+            _configuration.Blacklist = _blacklist;
+            _configuration.TranMode = _tranMode;
             _pluginInterface.SavePluginConfig(_configuration);
         }
 

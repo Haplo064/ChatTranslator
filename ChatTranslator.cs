@@ -1,15 +1,5 @@
 ﻿// TODOS
-// Allow for echo channel -- DONE
-// Single colour option for translated text -- DONE
-// Fix not loading language selection -- DONE
-// Append Translation (optional) -- DONE
-// Replace with Translation (optional) -- DONE
-// Fix colour 'bleeding' into next line - DONE
-// Option to only translate defined language(s) - DONE
-// Send all translations to USER DEFINED CHANNEL (optional) - DONE
-
-//Create a blacklist of things to not translate (string array)
-//Also have a rolling list of past translations, to add easily?
+// Publish
 
 using Dalamud.Configuration;
 using Dalamud.Game.Text;
@@ -37,10 +27,12 @@ namespace ChatTranslator
         private bool _oneChan;
         private readonly string[] _tranModeOptions = { "Append", "Replace", "Additional" };
         private Lumina.Excel.ExcelSheet<UIColor> _uiColours;
-        private bool _notself;
+        private bool _notSelf;
         private bool _whitelist;
+        private List<string> _blacklist;
         private List<int> _chosenLanguages;
         private List<XivChatType> _channels = new List<XivChatType>();
+        private readonly List<string> _lastTranslations = new List<string>();
 
         private readonly List<XivChatType> _order = new List<XivChatType>
         {
@@ -128,7 +120,7 @@ namespace ChatTranslator
             "CrossLinkShell8"
         };
 
-        private readonly bool[] _yesno = {
+        private readonly bool[] _yesNo = {
             false, false, false, false, true,
             true, false, true, true, true,
             true, true, true, true, true,
@@ -182,26 +174,28 @@ namespace ChatTranslator
         public void Initialize(DalamudPluginInterface pluginInterface)
         {
 
-            this._pluginInterface = pluginInterface;
+            _pluginInterface = pluginInterface;
             _configuration = pluginInterface.GetPluginConfig() as Config ?? new Config();
-            this._pluginInterface.Framework.Gui.Chat.OnChatMessage += Chat_OnChatMessage;
-            this._pluginInterface.UiBuilder.OnBuildUi += TranslatorConfigUi;
-            this._pluginInterface.UiBuilder.OnOpenConfigUi += TranslatorConfig;
-            this._pluginInterface.CommandManager.AddHandler("/trn", new CommandInfo(Command)
+            _pluginInterface.Framework.Gui.Chat.OnChatMessage += Chat_OnChatMessage;
+            _pluginInterface.UiBuilder.OnBuildUi += TranslatorConfigUi;
+            _pluginInterface.UiBuilder.OnOpenConfigUi += TranslatorConfig;
+            _pluginInterface.CommandManager.AddHandler("/trn", new CommandInfo(Command)
             {
                 HelpMessage = "Opens the Chat Translator config menu"
             });
             _uiColours = pluginInterface.Data.Excel.GetSheet<UIColor>();
             _channels = _configuration.Channels;
             _textColour = _configuration.TextColour;
+            _tranMode = _configuration.TranMode;
             _languageInt = _configuration.Lang;
             _whitelist = _configuration.Whitelist;
-            _notself = _configuration.NotSelf;
+            _notSelf = _configuration.NotSelf;
             _oneChan = _configuration.OneChan;
             _oneInt = _configuration.OneInt;
             _chosenLanguages = _configuration.ChosenLanguages;
+            _blacklist = _configuration.Blacklist;
         }
-        
+
         public void Dispose()
         {
             _pluginInterface.Framework.Gui.Chat.OnChatMessage -= Chat_OnChatMessage;
@@ -236,5 +230,7 @@ namespace ChatTranslator
         public List<int> ChosenLanguages { get; set; } = new List<int>();
         public bool OneChan { get; set; }
         public int OneInt { get; set; }
+        public List<string> Blacklist { get; set; } = new List<string>();
+        public int TranMode { get; set; }
     }
 }

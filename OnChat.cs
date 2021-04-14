@@ -50,26 +50,25 @@ namespace ChatTranslator
                 }
 
                 if (!run) return;
-                foreach (var pl in message.Payloads)
-                {
-                    PluginLog.Log($"{pl.Type}");
-                    if (pl.Type != PayloadType.UIForeground) continue;
-                    var xx = (UIForegroundPayload)pl;
-                    PluginLog.Log($"RGB: {xx.RGB}");
-                }
+
                 var messageString = message.TextValue;
                 var predictedLanguage = Lang(messageString);
                 PluginLog.Log($"PRED LANG: {predictedLanguage}");
-                var fmessage = new SeString(new List<Payload>());
-                fmessage.Append(message);
+                var originalMessage = new SeString(new List<Payload>());
+                originalMessage.Append(message);
 
                 var yes = true;
                 var pos = Array.IndexOf(_codes, predictedLanguage);
+                //Check for whitelist settings
                 if (_whitelist && !_chosenLanguages.Contains(pos))
                 { yes = false; }
-                if (_notself && _pluginInterface.ClientState.LocalPlayer.Name == pName)
+                //Check for notSelf setting
+                if (_notSelf && _pluginInterface.ClientState.LocalPlayer.Name == pName)
                 { yes = false; }
-
+                //Check for blacklist settings
+                if (_blacklist.Contains(messageString))
+                { yes = false; }
+                
                 if (predictedLanguage == _codes[_languageInt] || !yes) return;
                 var rawExists = message.Payloads.Any(payload => payload.Type == PayloadType.RawText);
                 if (!rawExists) return;
@@ -80,11 +79,11 @@ namespace ChatTranslator
 
                 void Function()
                 {
-                    if (Tran(type, fmessage, pName)) return;
+                    if (Tran(type, originalMessage, pName)) return;
                     PluginLog.Log("FALSE so printChat");
-                    fmessage.Payloads.Insert(0, new UIForegroundPayload(_pluginInterface.Data, 0));
-                    fmessage.Payloads.Insert(0, new UIForegroundPayload(_pluginInterface.Data, 48));
-                    PrintChat(type, pName, fmessage);
+                    originalMessage.Payloads.Insert(0, new UIForegroundPayload(_pluginInterface.Data, 0));
+                    originalMessage.Payloads.Insert(0, new UIForegroundPayload(_pluginInterface.Data, 48));
+                    PrintChat(type, pName, originalMessage);
                 }
 
                 Task.Run(Function);
