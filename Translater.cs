@@ -59,7 +59,7 @@ namespace ChatTranslator
             return trans.ToString();
         }
 
-        private bool Tran(XivChatType type, SeString messageSeString, string senderName)
+        private SeString Tran(SeString messageSeString)
         {
             var cleanMessage = new SeString(new List<Payload>());
             cleanMessage.Append(messageSeString);
@@ -74,7 +74,7 @@ namespace ChatTranslator
                 run = false;
             }
 
-            if (!run) return false;
+            if (!run) return messageSeString;
             var tranDone = false;
 
             for (var i = 0; i < messageSeString.Payloads.Count; i++)
@@ -114,7 +114,7 @@ namespace ChatTranslator
                 tranDone = true;
             }
 
-            if (!tranDone) return false;
+            if (!tranDone) return messageSeString;
             // Adding to the rolling "last translation" list
             _lastTranslations.Insert(0,cleanMessage.TextValue);
             if(_lastTranslations.Count > 10) _lastTranslations.RemoveAt(10);
@@ -123,23 +123,15 @@ namespace ChatTranslator
             {
                 var tranMessage = new SeString(new List<Payload>());
                 tranMessage.Payloads.Add(new TextPayload(" | "));
-                originalMessage.Payloads.Insert(0, new UIForegroundPayload(_pluginInterface.Data, 0));
-                originalMessage.Payloads.Insert(0, new UIForegroundPayload(_pluginInterface.Data, 48));
+                //originalMessage.Payloads.Insert(0, new UIForegroundPayload(_pluginInterface.Data, 0));
+                //originalMessage.Payloads.Insert(0, new UIForegroundPayload(_pluginInterface.Data, 48));
                 originalMessage.Append(tranMessage);
                 originalMessage.Append(messageSeString);
-                PrintChat(type, senderName, originalMessage);
-                return true;
+                return originalMessage;
+                //PrintChat(type, senderName, originalMessage);
             }
-            else // Replace or Additional
-            {
-                messageSeString.Payloads.Insert(0, new UIForegroundPayload(_pluginInterface.Data, 0));
-                messageSeString.Payloads.Insert(0, new UIForegroundPayload(_pluginInterface.Data, 48));
-                if (_oneChan && _tranMode == 2)
-                { PrintChat(_order[_oneInt], senderName, messageSeString); }
-                else { PrintChat(type, senderName, messageSeString); }
+            return messageSeString;
 
-                return true;
-            }
         }
     }
 }
