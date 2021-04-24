@@ -8,6 +8,7 @@ using Dalamud.Plugin;
 using Lumina.Excel.GeneratedSheets;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ChatTranslator
 {
@@ -194,6 +195,8 @@ namespace ChatTranslator
             _oneInt = _configuration.OneInt;
             _chosenLanguages = _configuration.ChosenLanguages;
             _blacklist = _configuration.Blacklist;
+
+            Task.Run(() => TranslateQueueProcessor(TranslateQueueToken.Token));
         }
 
         public void Dispose()
@@ -202,6 +205,7 @@ namespace ChatTranslator
             _pluginInterface.UiBuilder.OnBuildUi -= TranslatorConfigUi;
             _pluginInterface.UiBuilder.OnOpenConfigUi -= TranslatorConfig;
             _pluginInterface.CommandManager.RemoveHandler("/trn");
+            TranslateQueueToken.Cancel();
         }
 
         private void Command(string command, string arguments) => _config = true;
