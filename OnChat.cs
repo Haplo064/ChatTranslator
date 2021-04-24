@@ -6,11 +6,27 @@ using System.Collections.Generic;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Plugin;
+using System.Collections.Concurrent;
+using System.Threading;
 
 namespace ChatTranslator
 {
     public partial class ChatTranslator
     {
+        private BlockingCollection<(XivChatType type, uint senderId, SeString sender, SeString message)> TranslateQueue = new();
+        private CancellationTokenSource TranslateQueueToken = new();
+
+        private void TranslateQueueProcessor(CancellationToken token)
+        {
+            while (!token.IsCancellationRequested)
+            {
+                if (!TranslateQueue.TryTake(out var message, 1000, token))
+                    continue;
+
+                // Put your stuff here
+            }
+        }
+
         private void Chat_OnChatMessage(XivChatType type, uint senderId, ref SeString sender, ref SeString message, ref bool isHandled)
         {
             try
@@ -19,7 +35,11 @@ namespace ChatTranslator
                 if (!_channels.Contains(type)) return;
                 var pName = getName(sender, type, message);
                 var run = true;
-                
+
+                // Put this somewhere
+                TranslateQueue.Add((type, senderId, sender, message));
+
+
                 //Catch already translated messages
                 if (message.Payloads.Count < 2) { }
                 else if (message.Payloads[0].Type == PayloadType.UIForeground && message.Payloads[1].Type == PayloadType.UIForeground)
@@ -28,7 +48,6 @@ namespace ChatTranslator
                     run = false;
                 }
                 if (!run) return;
-
                 
                 var messageString = message.TextValue;
                 var predictedLanguage = Lang(messageString);
