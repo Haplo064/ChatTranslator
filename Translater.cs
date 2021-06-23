@@ -31,6 +31,21 @@ namespace ChatTranslator
             }
         }
 
+        // Obviously not a non exhaustive list, this mainly deals with unprintable characters when translating to Romanian
+        public static readonly Dictionary<char, char> UnprintableReplacement = new Dictionary<char, char>
+        {
+            {'Ă', 'A'},
+            {'ă', 'a'},
+            {'Ș', 's'},
+            {'ș', 's'},
+            {'Ț', 'T'},
+            {'ț', 't'},
+            {'Ē', 'E'},
+            {'ē', 'e'},
+            {'Č', 'C'},
+            {'č', 'c'}
+        };
+
         private static string Lang(string message)
         {
             var languages = Identifier.Identify(message);
@@ -102,6 +117,12 @@ namespace ChatTranslator
                 var text = (TextPayload)messageSeString.Payloads[i];
                 var translatedText = Translate(text.Text);
                 if (translatedText == "LOOP") continue;
+                //Check if unprintable characters should be replaced
+                if (_replaceUnprintable)
+                {
+                    translatedText = string.Join("", translatedText
+                        .Select(c => UnprintableReplacement.ContainsKey(c) ? UnprintableReplacement[c] : c));
+                }
                 messageSeString.Payloads[i] = new TextPayload(translatedText);
                 messageSeString.Payloads.Insert(i, new UIForegroundPayload(_pluginInterface.Data, (ushort)_textColour[0].Option));
                 messageSeString.Payloads.Insert(i, new UIForegroundPayload(_pluginInterface.Data, 0));

@@ -19,6 +19,7 @@ namespace ChatTranslator
             _configuration.TextColour = _textColour;
             _configuration.Blacklist = _blacklist;
             _configuration.TranMode = _tranMode;
+            _configuration.ReplaceUnprintable = _replaceUnprintable;
             _pluginInterface.SavePluginConfig(_configuration);
         }
 

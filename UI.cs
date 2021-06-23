@@ -59,6 +59,12 @@ namespace ChatTranslator
                                 SaveConfig();
                             }
                         }
+
+                        ImGui.Checkbox("Replace unprintable characters", ref _replaceUnprintable);
+                        ImGui.SameLine();
+                        ImGui.Text("(?)"); if (ImGui.IsItemHovered()) { ImGui.SetTooltip("Replaces characters that would otherwise" +
+                                                                                                "\nshow up as \"=\" in chat with accentless" +
+                                                                                                "\nor best/closest chat-printable matches.");}
                         
                         ImGui.EndTabItem();
                     }
