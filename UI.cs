@@ -59,7 +59,20 @@ namespace ChatTranslator
                                 SaveConfig();
                             }
                         }
-                        
+
+                        ImGui.Checkbox("Replace unprintable characters", ref _replaceUnprintable);
+                        ImGui.SameLine();
+                        ImGui.Text("(?)"); if (ImGui.IsItemHovered()) { ImGui.SetTooltip("Replaces characters that would otherwise" +
+                                                                                                "\nshow up as \"=\" in chat with accentless" +
+                                                                                                "\nor best/closest chat-printable matches.");}
+
+                        if (_replaceUnprintable)
+                        {
+                            ImGui.Checkbox("Remove all diacritics from translations", ref _removeDiacritics);
+                            ImGui.SameLine();
+                            ImGui.Text("(?)"); if (ImGui.IsItemHovered()) { ImGui.SetTooltip("Strip translation of all diacritics regardless" +
+                                                                                                     "\nof whether they can be displayed or not.");}
+                        }
                         ImGui.EndTabItem();
                     }
                     

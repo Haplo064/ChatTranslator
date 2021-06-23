@@ -10,7 +10,9 @@ using Dalamud.Plugin;
 using IvanAkcheurov.NTextCat.Lib;
 using System.IO;
 using System.Net;
-using Newtonsoft.Json.Linq;
+ using System.Text;
+ using IvanAkcheurov.Commons;
+ using Newtonsoft.Json.Linq;
 
 namespace ChatTranslator
 {
@@ -29,6 +31,40 @@ namespace ChatTranslator
                 var path = Uri.UnescapeDataString(uri.Path);
                 return Path.GetDirectoryName(path);
             }
+        }
+
+        // Obviously not a non exhaustive list, this mainly deals with unprintable characters when translating to Romanian
+        public static readonly Dictionary<char, char> UnprintableReplacement = new Dictionary<char, char>
+        {
+            {'Ă', 'A'},
+            {'ă', 'a'},
+            {'Ș', 'S'},
+            {'ș', 's'},
+            {'Ş', 'S'},
+            {'ş', 's'},
+            {'Ț', 'T'},
+            {'ț', 't'},
+            {'Ē', 'E'},
+            {'ē', 'e'},
+            {'Č', 'C'},
+            {'č', 'c'}
+        };
+        
+        static string RemoveDiacritics(string text) 
+        {
+            var normalizedString = text.Normalize(NormalizationForm.FormD);
+            var stringBuilder = new StringBuilder();
+
+            foreach (var c in normalizedString)
+            {
+                var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+                if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+                {
+                    stringBuilder.Append(c);
+                }
+            }
+
+            return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
         }
 
         private static string Lang(string message)
@@ -102,6 +138,21 @@ namespace ChatTranslator
                 var text = (TextPayload)messageSeString.Payloads[i];
                 var translatedText = Translate(text.Text);
                 if (translatedText == "LOOP") continue;
+                //Check if unprintable characters should be replaced
+                if (_replaceUnprintable)
+                {
+                    if (_removeDiacritics)
+                    {
+                        translatedText = RemoveDiacritics(translatedText);
+                    }
+                    else
+                    {
+                        UnprintableReplacement.Keys.ForEach(c =>
+                        {
+                            translatedText = translatedText.Replace(c, UnprintableReplacement[c]);
+                        });
+                    }
+                }
                 messageSeString.Payloads[i] = new TextPayload(translatedText);
                 messageSeString.Payloads.Insert(i, new UIForegroundPayload(_pluginInterface.Data, (ushort)_textColour[0].Option));
                 messageSeString.Payloads.Insert(i, new UIForegroundPayload(_pluginInterface.Data, 0));
