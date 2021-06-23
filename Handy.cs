@@ -20,6 +20,7 @@ namespace ChatTranslator
             _configuration.Blacklist = _blacklist;
             _configuration.TranMode = _tranMode;
             _configuration.ReplaceUnprintable = _replaceUnprintable;
+            _configuration.RemoveDiacritics = _removeDiacritics;
             _pluginInterface.SavePluginConfig(_configuration);
         }
 

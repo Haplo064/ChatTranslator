@@ -30,6 +30,7 @@ namespace ChatTranslator
         private bool _notSelf;
         private bool _whitelist;
         private bool _replaceUnprintable;
+        private bool _removeDiacritics;
         private List<string> _blacklist;
         private List<int> _chosenLanguages;
         private List<XivChatType> _channels = new List<XivChatType>();
@@ -234,5 +235,6 @@ namespace ChatTranslator
         public List<string> Blacklist { get; set; } = new List<string>();
         public int TranMode { get; set; }
         public bool ReplaceUnprintable { get; set; }
+        public bool RemoveDiacritics { get; set; }
     }
 }

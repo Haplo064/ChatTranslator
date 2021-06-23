@@ -10,7 +10,9 @@ using Dalamud.Plugin;
 using IvanAkcheurov.NTextCat.Lib;
 using System.IO;
 using System.Net;
-using Newtonsoft.Json.Linq;
+ using System.Text;
+ using IvanAkcheurov.Commons;
+ using Newtonsoft.Json.Linq;
 
 namespace ChatTranslator
 {
@@ -36,8 +38,10 @@ namespace ChatTranslator
         {
             {'Ă', 'A'},
             {'ă', 'a'},
-            {'Ș', 's'},
+            {'Ș', 'S'},
             {'ș', 's'},
+            {'Ş', 'S'},
+            {'ş', 's'},
             {'Ț', 'T'},
             {'ț', 't'},
             {'Ē', 'E'},
@@ -45,6 +49,23 @@ namespace ChatTranslator
             {'Č', 'C'},
             {'č', 'c'}
         };
+        
+        static string RemoveDiacritics(string text) 
+        {
+            var normalizedString = text.Normalize(NormalizationForm.FormD);
+            var stringBuilder = new StringBuilder();
+
+            foreach (var c in normalizedString)
+            {
+                var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+                if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+                {
+                    stringBuilder.Append(c);
+                }
+            }
+
+            return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
+        }
 
         private static string Lang(string message)
         {
@@ -120,8 +141,17 @@ namespace ChatTranslator
                 //Check if unprintable characters should be replaced
                 if (_replaceUnprintable)
                 {
-                    translatedText = string.Join("", translatedText
-                        .Select(c => UnprintableReplacement.ContainsKey(c) ? UnprintableReplacement[c] : c));
+                    if (_removeDiacritics)
+                    {
+                        translatedText = RemoveDiacritics(translatedText);
+                    }
+                    else
+                    {
+                        UnprintableReplacement.Keys.ForEach(c =>
+                        {
+                            translatedText = translatedText.Replace(c, UnprintableReplacement[c]);
+                        });
+                    }
                 }
                 messageSeString.Payloads[i] = new TextPayload(translatedText);
                 messageSeString.Payloads.Insert(i, new UIForegroundPayload(_pluginInterface.Data, (ushort)_textColour[0].Option));
