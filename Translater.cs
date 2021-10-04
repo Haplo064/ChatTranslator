@@ -1,30 +1,29 @@
-﻿﻿using System;
-using System.Linq;
+﻿using System;
 using System.Collections.Generic;
- using System.Diagnostics;
- using System.Globalization;
- using Dalamud.Game.Text;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Net;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
-using Dalamud.Plugin;
-using IvanAkcheurov.NTextCat.Lib;
-using System.IO;
-using System.Net;
+using Dalamud.Logging;
 using Newtonsoft.Json.Linq;
+using NTextCat;
 
 namespace ChatTranslator
 {
     public partial class ChatTranslator
     {
-        // NCat
-        private static readonly RankedLanguageIdentifierFactory Factory = new RankedLanguageIdentifierFactory();
+        // NTextCat
+        private static readonly RankedLanguageIdentifierFactory Factory = new();
         private static readonly RankedLanguageIdentifier Identifier = Factory.Load(Path.Combine(AssemblyDirectory, "Wiki82.profile.xml"));
 
         private static string AssemblyDirectory
         {
             get
             {
-                var codeBase = typeof(ChatTranslator).Assembly.CodeBase;
+                var codeBase = typeof(ChatTranslator).Assembly.Location;
                 var uri = new UriBuilder(codeBase);
                 var path = Uri.UnescapeDataString(uri.Path);
                 return Path.GetDirectoryName(path);
@@ -68,7 +67,7 @@ namespace ChatTranslator
 
             var run = true;
             if (messageSeString.Payloads.Count < 2) { }
-            else if (messageSeString.Payloads[0] == new UIForegroundPayload(_pluginInterface.Data, 48) && messageSeString.Payloads[1] == new UIForegroundPayload(_pluginInterface.Data, 0))
+            else if (messageSeString.Payloads[0] == new UIForegroundPayload(48) && messageSeString.Payloads[1] == new UIForegroundPayload(0))
             {
                 PluginLog.Log("Caught loop B");
                 run = false;
@@ -103,13 +102,13 @@ namespace ChatTranslator
                 var translatedText = Translate(text.Text);
                 if (translatedText == "LOOP") continue;
                 messageSeString.Payloads[i] = new TextPayload(translatedText);
-                messageSeString.Payloads.Insert(i, new UIForegroundPayload(_pluginInterface.Data, (ushort)_textColour[0].Option));
-                messageSeString.Payloads.Insert(i, new UIForegroundPayload(_pluginInterface.Data, 0));
+                messageSeString.Payloads.Insert(i, new UIForegroundPayload((ushort)_textColour[0].Option));
+                messageSeString.Payloads.Insert(i, new UIForegroundPayload(0));
 
                 if (i + 3 < messageSeString.Payloads.Count)
-                    messageSeString.Payloads.Insert(i + 3, new UIForegroundPayload(_pluginInterface.Data, 0));
+                    messageSeString.Payloads.Insert(i + 3, new UIForegroundPayload(0));
                 else
-                    messageSeString.Payloads.Append(new UIForegroundPayload(_pluginInterface.Data, 0));
+                    messageSeString.Payloads.Append(new UIForegroundPayload(0));
                 i += 2;
                 tranDone = true;
             }
