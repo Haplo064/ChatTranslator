@@ -11,6 +11,8 @@ using IvanAkcheurov.NTextCat.Lib;
 using System.IO;
 using System.Net;
 using Newtonsoft.Json.Linq;
+using Dalamud.Logging;
+using System.Reflection;
 
 namespace ChatTranslator
 {
@@ -18,7 +20,7 @@ namespace ChatTranslator
     {
         // NCat
         private static readonly RankedLanguageIdentifierFactory Factory = new RankedLanguageIdentifierFactory();
-        private static readonly RankedLanguageIdentifier Identifier = Factory.Load(Path.Combine(AssemblyDirectory, "Wiki82.profile.xml"));
+        private static readonly RankedLanguageIdentifier Identifier = Factory.Load(Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location).ToString(), "Wiki82.profile.xml"));
 
         private static string AssemblyDirectory
         {
@@ -68,7 +70,7 @@ namespace ChatTranslator
 
             var run = true;
             if (messageSeString.Payloads.Count < 2) { }
-            else if (messageSeString.Payloads[0] == new UIForegroundPayload(_pluginInterface.Data, 48) && messageSeString.Payloads[1] == new UIForegroundPayload(_pluginInterface.Data, 0))
+            else if (messageSeString.Payloads[0] == new UIForegroundPayload(48) && messageSeString.Payloads[1] == new UIForegroundPayload(0))
             {
                 PluginLog.Log("Caught loop B");
                 run = false;
@@ -103,13 +105,13 @@ namespace ChatTranslator
                 var translatedText = Translate(text.Text);
                 if (translatedText == "LOOP") continue;
                 messageSeString.Payloads[i] = new TextPayload(translatedText);
-                messageSeString.Payloads.Insert(i, new UIForegroundPayload(_pluginInterface.Data, (ushort)_textColour[0].Option));
-                messageSeString.Payloads.Insert(i, new UIForegroundPayload(_pluginInterface.Data, 0));
+                messageSeString.Payloads.Insert(i, new UIForegroundPayload((ushort)_textColour[0].Option));
+                messageSeString.Payloads.Insert(i, new UIForegroundPayload(0));
 
                 if (i + 3 < messageSeString.Payloads.Count)
-                    messageSeString.Payloads.Insert(i + 3, new UIForegroundPayload(_pluginInterface.Data, 0));
+                    messageSeString.Payloads.Insert(i + 3, new UIForegroundPayload(0));
                 else
-                    messageSeString.Payloads.Append(new UIForegroundPayload(_pluginInterface.Data, 0));
+                    messageSeString.Payloads.Append(new UIForegroundPayload(0));
                 i += 2;
                 tranDone = true;
             }

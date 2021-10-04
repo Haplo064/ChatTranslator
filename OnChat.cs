@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Plugin;
+using Dalamud.Logging;
 
 namespace ChatTranslator
 {
@@ -40,7 +41,7 @@ namespace ChatTranslator
                 if (_whitelist && !_chosenLanguages.Contains(pos))
                 { yes = false; }
                 //Check for notSelf setting
-                if (_notSelf && _pluginInterface.ClientState.LocalPlayer.Name == pName)
+                if (_notSelf && State.LocalPlayer.Name.TextValue == pName)
                 { yes = false; }
                 //Check for blacklist settings
                 if (_blacklist.Contains(messageString))
@@ -77,7 +78,7 @@ namespace ChatTranslator
 
         public string getName(SeString sender, XivChatType type, SeString message)
         {
-            var pName = _pluginInterface.ClientState.LocalPlayer.Name;
+            var pName = State.LocalPlayer.Name.TextValue;
             if (sender.Payloads.Count > 0)
             {
                 if (sender.Payloads[0].Type == PayloadType.Player)
