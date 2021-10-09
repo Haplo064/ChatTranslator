@@ -48,7 +48,12 @@ namespace ChatTranslator
             var reader = new StreamReader(requestResult.GetResponseStream() ?? throw new Exception());
             var read = reader.ReadToEnd();
             var parsed = JObject.Parse(read);
-            var trans = ((JArray)parsed["sentences"])?[0]["trans"];
+            var sentences = (JArray) parsed["sentences"];
+            string trans = "";
+            for (int i = 0; i < sentences.Count; i++)
+            {
+                trans += sentences[i]["trans"].ToString();
+            }
             var src = ((JValue)parsed["src"]);
             Debug.Assert(trans != null, nameof(trans) + " != null");
             if (src != null && (src.ToString(CultureInfo.InvariantCulture) == lang || trans.ToString() == text))

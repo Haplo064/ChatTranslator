@@ -211,11 +211,8 @@ namespace ChatTranslator
                     {
                         if (_chatters.Count > 0)
                         {
-                            PluginLog.Log("Translate");
                             var tranSeString = Tran(_chatters[0].Message);
-                            PluginLog.Log("Message in chat");
                             Chat.PrintChat(new XivChatEntry{Message = tranSeString, Name = _chatters[0].Sender, Type = _chatters[0].Type});
-                            PluginLog.Log("Remove from list");
                             _chatters.RemoveAt(0);
                         }
                     }

@@ -13,10 +13,6 @@ namespace ChatTranslator
     {
         private void Chat_OnChatMessage(XivChatType type, uint senderId, ref SeString sender, ref SeString message, ref bool isHandled)
         {
-            var realOriginalMessage = message;
-            
-            PrintChatToLog(message.TextValue);
-            
             try
             {
                 if (isHandled) return;
@@ -44,7 +40,8 @@ namespace ChatTranslator
                 if (_whitelist && !_chosenLanguages.Contains(pos))
                 { yes = false; }
                 //Check for notSelf setting
-                if (_notSelf && ClientState.LocalPlayer.Name == pName)
+                PluginLog.Log($"MY NAME: {ClientState.LocalPlayer.Name} vs: {pName}");
+                if (_notSelf && ClientState.LocalPlayer.Name.TextValue == pName.TextValue)
                 { yes = false; }
                 //Check for blacklist settings
                 if (_blacklist.Contains(messageString))
@@ -77,31 +74,10 @@ namespace ChatTranslator
 
         public SeString getName(SeString sender, XivChatType type, SeString message)
         {
-            var pName = ClientState.LocalPlayer.Name;
-            if (sender.Payloads.Count > 0)
-            {
-                if (sender.Payloads[0].Type == PayloadType.Player)
-                {
-                    var pPayload = (PlayerPayload) sender.Payloads[0];
-                    pName = pPayload.PlayerName;
-                }
-
-                if (sender.Payloads[0].Type == PayloadType.Icon && sender.Payloads[1].Type == PayloadType.Player)
-                {
-                    var pPayload = (PlayerPayload) sender.Payloads[1];
-                    pName = pPayload.PlayerName;
-                }
-            }
-
-            if (type == XivChatType.StandardEmote || type == XivChatType.CustomEmote)
-            {
-                if (message.Payloads[0].Type == PayloadType.Player)
-                {
-                    var pPayload = (PlayerPayload) message.Payloads[0];
-                    pName = pPayload.PlayerName;
-                }
-            }
-
+            var playerPayload = sender.Payloads.SingleOrDefault(x => x is PlayerPayload) as PlayerPayload;
+            if (type is XivChatType.StandardEmote) playerPayload = message.Payloads.FirstOrDefault(x => x is PlayerPayload) as PlayerPayload;
+            var pName = playerPayload == default(PlayerPayload) ? ClientState.LocalPlayer.Name.TextValue : playerPayload.PlayerName;
+            PluginLog.Log(pName);
             return pName;
         }
 
