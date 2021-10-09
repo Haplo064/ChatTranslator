@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿﻿using System;
 using System.Threading.Tasks;
-using Dalamud.Game.Text;
+using System.Collections.Generic;
+ using System.Linq;
+ using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
-using Dalamud.Logging;
+using Dalamud.Plugin;
 
 namespace ChatTranslator
 {
@@ -13,10 +13,6 @@ namespace ChatTranslator
     {
         private void Chat_OnChatMessage(XivChatType type, uint senderId, ref SeString sender, ref SeString message, ref bool isHandled)
         {
-            var realOriginalMessage = message;
-            
-            PrintChatToLog(message.TextValue);
-            
             try
             {
                 if (isHandled) return;
@@ -44,7 +40,7 @@ namespace ChatTranslator
                 if (_whitelist && !_chosenLanguages.Contains(pos))
                 { yes = false; }
                 //Check for notSelf setting
-                if (_notSelf && ClientState.LocalPlayer.Name == pName)
+                if (_notSelf && _pluginInterface.ClientState.LocalPlayer.Name == pName)
                 { yes = false; }
                 //Check for blacklist settings
                 if (_blacklist.Contains(messageString))
@@ -67,12 +63,11 @@ namespace ChatTranslator
                 
                 if (_tranMode == 2) // is it Append (0), Replace (1), or additional (2)
                 {
-                    PrintChat(type, pName.ToString(), tranSeString.Result);
+                    PrintChat(type, pName, tranSeString.Result);
                 }
 
-                // Dirty hotfix for broken message
-                message = realOriginalMessage;
-                // message = tranSeString.Result;
+                message = tranSeString.Result;
+
             }
             catch (Exception e)
             {
@@ -80,9 +75,9 @@ namespace ChatTranslator
             }
         }
 
-        public SeString getName(SeString sender, XivChatType type, SeString message)
+        public string getName(SeString sender, XivChatType type, SeString message)
         {
-            var pName = ClientState.LocalPlayer.Name;
+            var pName = _pluginInterface.ClientState.LocalPlayer.Name;
             if (sender.Payloads.Count > 0)
             {
                 if (sender.Payloads[0].Type == PayloadType.Player)

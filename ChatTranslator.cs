@@ -1,28 +1,20 @@
 ﻿// TODOS
 // Publish
 
-using System.Collections.Generic;
 using Dalamud.Configuration;
-using Dalamud.Data;
-using Dalamud.IoC;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.Command;
-using Dalamud.Game.Gui;
 using Dalamud.Game.Text;
+using Dalamud.Game.Command;
 using Dalamud.Plugin;
 using Lumina.Excel.GeneratedSheets;
+using System;
+using System.Collections.Generic;
 
 namespace ChatTranslator
 {
     public partial class ChatTranslator : IDalamudPlugin
     {
-        [PluginService] public static DalamudPluginInterface PluginInterface { get; private set; } = null!;
-        [PluginService] public static CommandManager CommandManager { get; private set; } = null!;
-        [PluginService] public static DataManager Data { get; private set; }
-        [PluginService] public static ChatGui Chat { get; private set; } = null!;
-        [PluginService] public static ClientState ClientState { get; private set; }
-        
         public string Name => "Chat Translator";
+        private DalamudPluginInterface _pluginInterface;
         private Config _configuration;
         private bool _config;
         private int _languageInt = 16;
@@ -179,18 +171,19 @@ namespace ChatTranslator
             "Chinese Classical", "Chinese yue"
         };
 
-        public ChatTranslator()
+        public void Initialize(DalamudPluginInterface pluginInterface)
         {
-            _configuration = PluginInterface.GetPluginConfig() as Config ?? new Config();
-            Chat.ChatMessage += Chat_OnChatMessage;
-            
-            PluginInterface.UiBuilder.Draw += TranslatorConfigUi;
-            PluginInterface.UiBuilder.OpenConfigUi += OpenConfigUi;
-            CommandManager.AddHandler("/trn", new CommandInfo(Command)
+
+            _pluginInterface = pluginInterface;
+            _configuration = pluginInterface.GetPluginConfig() as Config ?? new Config();
+            _pluginInterface.Framework.Gui.Chat.OnChatMessage += Chat_OnChatMessage;
+            _pluginInterface.UiBuilder.OnBuildUi += TranslatorConfigUi;
+            _pluginInterface.UiBuilder.OnOpenConfigUi += TranslatorConfig;
+            _pluginInterface.CommandManager.AddHandler("/trn", new CommandInfo(Command)
             {
                 HelpMessage = "Opens the Chat Translator config menu"
             });
-            _uiColours = Data.Excel.GetSheet<UIColor>();
+            _uiColours = pluginInterface.Data.Excel.GetSheet<UIColor>();
             _channels = _configuration.Channels;
             _textColour = _configuration.TextColour;
             _tranMode = _configuration.TranMode;
@@ -205,18 +198,16 @@ namespace ChatTranslator
 
         public void Dispose()
         {
-            Chat.ChatMessage -= Chat_OnChatMessage;
-            PluginInterface.UiBuilder.Draw -= TranslatorConfigUi;
-            PluginInterface.UiBuilder.OpenConfigUi -= OpenConfigUi;
-            CommandManager.RemoveHandler("/trn");
+            _pluginInterface.Framework.Gui.Chat.OnChatMessage -= Chat_OnChatMessage;
+            _pluginInterface.UiBuilder.OnBuildUi -= TranslatorConfigUi;
+            _pluginInterface.UiBuilder.OnOpenConfigUi -= TranslatorConfig;
+            _pluginInterface.CommandManager.RemoveHandler("/trn");
         }
 
         private void Command(string command, string arguments) => _config = true;
 
-        private void OpenConfigUi()
-        {
-            _config = true;
-        }
+        // What to do when plugin install config button is pressed
+        private void TranslatorConfig(object sender, EventArgs args) => _config = true;
     }
 
     public class UiColorPick
