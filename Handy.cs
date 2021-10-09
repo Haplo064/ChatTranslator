@@ -1,6 +1,7 @@
 ﻿using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
+using Dalamud.Logging;
 using Dalamud.Plugin;
 
 namespace ChatTranslator
@@ -19,7 +20,7 @@ namespace ChatTranslator
             _configuration.TextColour = _textColour;
             _configuration.Blacklist = _blacklist;
             _configuration.TranMode = _tranMode;
-            _pluginInterface.SavePluginConfig(_configuration);
+            PluginInterface.SavePluginConfig(_configuration);
         }
 
         private void PrintChat(XivChatType type, string senderName, SeString messageSeString)
@@ -28,10 +29,10 @@ namespace ChatTranslator
             {
                 Type = type,
                 Name = senderName,
-                MessageBytes = messageSeString.Encode()
+                Message = messageSeString
             };
 
-            _pluginInterface.Framework.Gui.Chat.PrintChat(chat);
+            this.Chat.PrintChat(chat);
         }
 
         public void PrintChatToLog(SeString debugMe)
