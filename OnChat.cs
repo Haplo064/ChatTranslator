@@ -55,24 +55,19 @@ namespace ChatTranslator
                 var rawExists = message.Payloads.Any(payload => payload.Type == PayloadType.RawText);
                 if (!rawExists) return;
                 
-                var originalMessage = new SeString(new List<Payload>());
-                originalMessage.Append(message);
 
-                var tranSeString = Task.Run(() => Tran(originalMessage));
                 
                 if (_oneChan && _tranMode == 2)
                 {
                     type = _order[_oneInt];
                 }
-                
-                if (_tranMode == 2) // is it Append (0), Replace (1), or additional (2)
-                {
-                    PrintChat(type, pName.ToString(), tranSeString.Result);
-                }
 
-                // Dirty hotfix for broken message
-                message = realOriginalMessage;
-                // message = tranSeString.Result;
+                if (_tranMode == 0 || _tranMode == 1) isHandled = true;
+                
+                // is it Append (0), Replace (1), or additional (2)
+                _chatters.Add(new Chatter{Message = message, mode = _tranMode, Sender = sender, Type = type});
+             
+
             }
             catch (Exception e)
             {
@@ -109,5 +104,14 @@ namespace ChatTranslator
 
             return pName;
         }
+
+        public class Chatter
+        {
+            public int mode { get; set; }
+            public SeString Sender { get; set; }
+            public XivChatType Type { get; set; }
+            public SeString Message { get; set; }
+        }
+        
     }
 }

@@ -2,6 +2,8 @@
 // Publish
 
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Dalamud.Logging;
 using Dalamud.Configuration;
 using Dalamud.Data;
 using Dalamud.IoC;
@@ -41,6 +43,7 @@ namespace ChatTranslator
         private List<int> _chosenLanguages;
         private List<XivChatType> _channels = new List<XivChatType>();
         private readonly List<string> _lastTranslations = new List<string>();
+        private List<Chatter> _chatters = new List<Chatter>();
 
         private readonly List<XivChatType> _order = new List<XivChatType>
         {
@@ -201,6 +204,24 @@ namespace ChatTranslator
             _oneInt = _configuration.OneInt;
             _chosenLanguages = _configuration.ChosenLanguages;
             _blacklist = _configuration.Blacklist;
+            
+            Task.Run(() =>
+                {
+                    while (true)
+                    {
+                        if (_chatters.Count > 0)
+                        {
+                            PluginLog.Log("Translate");
+                            var tranSeString = Tran(_chatters[0].Message);
+                            PluginLog.Log("Message in chat");
+                            Chat.PrintChat(new XivChatEntry{Message = tranSeString, Name = _chatters[0].Sender, Type = _chatters[0].Type});
+                            PluginLog.Log("Remove from list");
+                            _chatters.RemoveAt(0);
+                        }
+                    }
+                    
+                }
+                );
         }
 
         public void Dispose()
