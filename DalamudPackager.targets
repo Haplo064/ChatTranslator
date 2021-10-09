@@ -6,6 +6,6 @@
                 OutputPath="$(OutputPath)"
                 AssemblyName="$(AssemblyName)"
                 MakeZip="true"
-                Include="ChatTranslator.dll;ChatTranslator.json;IvanAkcheurov.Commons.dll;IvanAkcheurov.NClassify.dll;IvanAkcheurov.NTextCat.Lib.dll;Wiki82.profile.xml;NTextCat.dll"/>
+                Include="ChatTranslator.dll;ChatTranslator.json;IvanAkcheurov.Commons.dll;IvanAkcheurov.NClassify.dll;IvanAkcheurov.NTextCat.Lib.dll;Wiki82.profile.xml"/>
     </Target>
 </Project>
