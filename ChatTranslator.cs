@@ -2,6 +2,8 @@
 // Publish
 
 using System.Collections.Generic;
+using System.Data.SqlTypes;
+using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Logging;
 using Dalamud.Configuration;
@@ -44,6 +46,7 @@ namespace ChatTranslator
         private List<XivChatType> _channels = new List<XivChatType>();
         private readonly List<string> _lastTranslations = new List<string>();
         private List<Chatter> _chatters = new List<Chatter>();
+        private bool _chatEngine = true;
 
         private readonly List<XivChatType> _order = new List<XivChatType>
         {
@@ -205,20 +208,38 @@ namespace ChatTranslator
             _chosenLanguages = _configuration.ChosenLanguages;
             _blacklist = _configuration.Blacklist;
             
-            Task.Run(() =>
+            Thread t = new Thread(new ThreadStart(ThreadProc));
+            t.Start();
+        }
+
+        public void ThreadProc()
+        {
+            PluginLog.Log("Translation Engine Started");
+            while (_chatEngine)
+            {
+                if(_chatters.Count>0)
                 {
-                    while (true)
+                    foreach (var chats in _chatters)
                     {
-                        if (_chatters.Count > 0)
+                        if (!chats.Sent)
                         {
-                            var tranSeString = Tran(_chatters[0].Message);
-                            Chat.PrintChat(new XivChatEntry{Message = tranSeString, Name = _chatters[0].Sender, Type = _chatters[0].Type});
-                            _chatters.RemoveAt(0);
+                            chats.Sent = true;
+                            var tranSeString = Tran(chats.Message);
+                            Chat.PrintChat(new XivChatEntry{Message = tranSeString, Name = chats.Sender, Type = chats.Type, SenderId = chats.SenderId});
+                        }
+
+                    }
+
+                    for (int i = _chatters.Count - 1; i > -1; i--)
+                    {
+                        if (_chatters[i].Sent)
+                        {
+                            _chatters.RemoveAt(i);
                         }
                     }
-                    
                 }
-                );
+
+            }
         }
 
         public void Dispose()
@@ -227,6 +248,7 @@ namespace ChatTranslator
             PluginInterface.UiBuilder.Draw -= TranslatorConfigUi;
             PluginInterface.UiBuilder.OpenConfigUi -= OpenConfigUi;
             CommandManager.RemoveHandler("/trn");
+            _chatEngine = false;
         }
 
         private void Command(string command, string arguments) => _config = true;

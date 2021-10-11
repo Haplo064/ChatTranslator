@@ -155,6 +155,15 @@ namespace ChatTranslator
                         }
                         ImGui.EndTabItem();
                     }
+                    if (ImGui.BeginTabItem("Debug"))
+                    {
+                        foreach (var chats in _chatters)
+                        {
+                            ImGui.Text($"{chats.Message.TextValue}");
+                            ImGui.Text($"{chats.Sent}");
+                        }
+                        ImGui.EndTabItem();
+                    }
                     ImGui.EndTabBar();
                 }
 

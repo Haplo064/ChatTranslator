@@ -32,7 +32,7 @@ namespace ChatTranslator
                 
                 var messageString = message.TextValue;
                 var predictedLanguage = Lang(messageString);
-                PluginLog.Log($"PRED LANG: {predictedLanguage}");
+                //PluginLog.Log($"PRED LANG: {predictedLanguage}");
 
                 var yes = true;
                 var pos = Array.IndexOf(_codes, predictedLanguage);
@@ -40,7 +40,7 @@ namespace ChatTranslator
                 if (_whitelist && !_chosenLanguages.Contains(pos))
                 { yes = false; }
                 //Check for notSelf setting
-                PluginLog.Log($"MY NAME: {ClientState.LocalPlayer.Name} vs: {pName}");
+                //PluginLog.Log($"MY NAME: {ClientState.LocalPlayer.Name} vs: {pName}");
                 if (_notSelf && ClientState.LocalPlayer.Name.TextValue == pName.TextValue)
                 { yes = false; }
                 //Check for blacklist settings
@@ -62,7 +62,7 @@ namespace ChatTranslator
                 if (_tranMode == 0 || _tranMode == 1) isHandled = true;
                 
                 // is it Append (0), Replace (1), or additional (2)
-                _chatters.Add(new Chatter{Message = message, mode = _tranMode, Sender = sender, Type = type});
+                _chatters.Add(new Chatter{Message = message, mode = _tranMode, Sender = sender, Type = type, Sent = false, SenderId = senderId});
              
 
             }
@@ -87,6 +87,8 @@ namespace ChatTranslator
             public SeString Sender { get; set; }
             public XivChatType Type { get; set; }
             public SeString Message { get; set; }
+            public uint SenderId { get; set; }
+            public bool Sent { get; set; }
         }
         
     }
