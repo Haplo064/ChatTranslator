@@ -15,6 +15,9 @@ using Dalamud.Game.Gui;
 using Dalamud.Game.Text;
 using Dalamud.Plugin;
 using Lumina.Excel.GeneratedSheets;
+using System.Collections.Concurrent;
+using System.IO;
+using System;
 
 namespace ChatTranslator
 {
@@ -45,7 +48,7 @@ namespace ChatTranslator
         private List<int> _chosenLanguages;
         private List<XivChatType> _channels = new List<XivChatType>();
         private readonly List<string> _lastTranslations = new List<string>();
-        private List<Chatter> _chatters = new List<Chatter>();
+        private BlockingCollection<Chatter> _chatters = new BlockingCollection<Chatter>();
         private bool _chatEngine = true;
 
         private readonly List<XivChatType> _order = new List<XivChatType>
@@ -187,6 +190,9 @@ namespace ChatTranslator
 
         public ChatTranslator()
         {
+            Identifier = Factory.Load(Path.Combine(PluginInterface.AssemblyLocation.DirectoryName, "Wiki82.profile.xml"));
+            PluginLog.Information($"XML file path: {Identifier}");
+
             _configuration = PluginInterface.GetPluginConfig() as Config ?? new Config();
             Chat.ChatMessage += Chat_OnChatMessage;
             
@@ -217,28 +223,17 @@ namespace ChatTranslator
             PluginLog.Log("Translation Engine Started");
             while (_chatEngine)
             {
-                if(_chatters.Count>0)
+                try
                 {
-                    foreach (var chats in _chatters)
-                    {
-                        if (!chats.Sent)
-                        {
-                            chats.Sent = true;
-                            var tranSeString = Tran(chats.Message);
-                            Chat.PrintChat(new XivChatEntry{Message = tranSeString, Name = chats.Sender, Type = chats.Type, SenderId = chats.SenderId});
-                        }
-
-                    }
-
-                    for (int i = _chatters.Count - 1; i > -1; i--)
-                    {
-                        if (_chatters[i].Sent)
-                        {
-                            _chatters.RemoveAt(i);
-                        }
-                    }
+                    var chats = _chatters.Take();
+                    PluginLog.Information("Dequeued: " + chats.Message);
+                    var tranSeString = Tran(chats.Message);
+                    Chat.PrintChat(new XivChatEntry { Message = tranSeString, Name = chats.Sender, Type = chats.Type, SenderId = chats.SenderId });
                 }
-
+                catch (Exception ex)
+                {
+                    PluginLog.Information($"Exception in thread loop: {ex.Message}\n{ex.StackTrace}");
+                }
             }
         }
 
