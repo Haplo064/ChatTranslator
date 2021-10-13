@@ -11,6 +11,7 @@ namespace ChatTranslator
 {
     public partial class ChatTranslator
     {
+
         private void Chat_OnChatMessage(XivChatType type, uint senderId, ref SeString sender, ref SeString message, ref bool isHandled)
         {
             try
@@ -60,11 +61,13 @@ namespace ChatTranslator
                 }
 
                 if (_tranMode == 0 || _tranMode == 1) isHandled = true;
-                
-                // is it Append (0), Replace (1), or additional (2)
-                _chatters.Add(new Chatter{Message = message, mode = _tranMode, Sender = sender, Type = type, Sent = false, SenderId = senderId});
-             
 
+                // is it Append (0), Replace (1), or additional (2)
+                var chatter = new Chatter { Message = message, mode = _tranMode, Sender = sender, Type = type, Sent = false, SenderId = senderId };
+                if (!_chatters.TryAdd(chatter))
+                {
+                    Task.Run(delegate { _chatters.Add(chatter); });
+                }
             }
             catch (Exception e)
             {

@@ -17,9 +17,9 @@ namespace ChatTranslator
     {
         // NTextCat
         private static readonly RankedLanguageIdentifierFactory Factory = new();
-        private static readonly RankedLanguageIdentifier Identifier = Factory.Load(Path.Combine(AssemblyDirectory, "Wiki82.profile.xml"));
+        internal static RankedLanguageIdentifier Identifier;
 
-        private static string AssemblyDirectory
+        /*private static string AssemblyDirectory
         {
             get
             {
@@ -28,7 +28,7 @@ namespace ChatTranslator
                 var path = Uri.UnescapeDataString(uri.Path);
                 return Path.GetDirectoryName(path);
             }
-        }
+        }*/
 
         private static string Lang(string message)
         {
