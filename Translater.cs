@@ -39,57 +39,64 @@ namespace ChatTranslator
 
         private string Translate(string text)
         {
-            var lang = _codes[_languageInt];
-            var url = "https://clients5.google.com/translate_a/t?client=dict-chrome-ex&sl=auto&tl=" + lang + "&q=" + text;
-            var request = (HttpWebRequest)WebRequest.Create(url);
-            request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36";
-            //PluginLog.Log("SENDING");
-            var requestResult = request.GetResponse();
-            //PluginLog.Log("READING");
-            var reader = new StreamReader(requestResult.GetResponseStream() ?? throw new Exception());
-            var read = reader.ReadToEnd();
-            var parsed = JObject.Parse(read);
-            var sentences = (JArray) parsed["sentences"];
-            string trans = "";
-            //PluginLog.Log($"PARSE LOOP ({sentences.Count})");
-
-            var take = 0;
             try
             {
-                //PluginLog.Log(sentences[sentences.Count-1]["src_translit"].ToString());
-                take++;
-                //PluginLog.Log("Translit");
-            }
-            catch
-            {
-                //PluginLog.Log("No translit");
-            }
-            for (int i = 0; i < sentences.Count-take; i++)
-            {
-                //PluginLog.Log(sentences[i]["trans"].ToString());
-                trans += sentences[i]["trans"].ToString();
-            }
-            //PluginLog.Log("PARSE LOOP DONE");
+                var lang = _codes[_languageInt];
+                var url = "https://clients5.google.com/translate_a/t?client=dict-chrome-ex&sl=auto&tl=" + lang + "&q=" + text;
+                var request = (HttpWebRequest)WebRequest.Create(url);
+                request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36";
+                //PluginLog.Log("SENDING");
+                var requestResult = request.GetResponse();
+                //PluginLog.Log("READING");
+                var reader = new StreamReader(requestResult.GetResponseStream() ?? throw new Exception());
+                var read = reader.ReadToEnd();
+                var parsed = JObject.Parse(read);
+                var sentences = (JArray)parsed["sentences"];
+                string trans = "";
+                //PluginLog.Log($"PARSE LOOP ({sentences.Count})");
 
-            JValue src = null;
-            try
-            {
-                src = ((JValue)parsed["src"]);
-                //PluginLog.Log(src.ToString());
+                var take = 0;
+                try
+                {
+                    //PluginLog.Log(sentences[sentences.Count-1]["src_translit"].ToString());
+                    take++;
+                    //PluginLog.Log("Translit");
+                }
+                catch
+                {
+                    //PluginLog.Log("No translit");
+                }
+                for (int i = 0; i < sentences.Count - take; i++)
+                {
+                    //PluginLog.Log(sentences[i]["trans"].ToString());
+                    trans += sentences[i]["trans"].ToString();
+                }
+                //PluginLog.Log("PARSE LOOP DONE");
+
+                JValue src = null;
+                try
+                {
+                    src = ((JValue)parsed["src"]);
+                    //PluginLog.Log(src.ToString());
+                }
+                catch
+                {
+                    //PluginLog.Log("No src");
+                }
+
+                Debug.Assert(trans != null, nameof(trans) + " != null");
+                if (src != null && (src.ToString(CultureInfo.InvariantCulture) == lang || trans.ToString() == text))
+                {
+                    //PluginLog.Log("LOOP XXX");
+                    return "LOOP";
+                }
+                //PluginLog.Log("RETURN");
+                return trans;
             }
-            catch
+            catch (Exception ex)
             {
-                //PluginLog.Log("No src");
+                return text;
             }
-            
-            Debug.Assert(trans != null, nameof(trans) + " != null");
-            if (src != null && (src.ToString(CultureInfo.InvariantCulture) == lang || trans.ToString() == text))
-            {
-                //PluginLog.Log("LOOP XXX");
-                return "LOOP";
-            }
-            //PluginLog.Log("RETURN");
-            return trans;
         }
 
         private SeString Tran(SeString messageSeString)
