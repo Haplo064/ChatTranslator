@@ -41,7 +41,7 @@ namespace ChatTranslator
                 { yes = false; }
                 //Check for notSelf setting
                 //PluginLog.Log($"MY NAME: {ClientState.LocalPlayer.Name} vs: {pName}");
-                if (_notSelf && ClientState.LocalPlayer.Name.TextValue == pName.TextValue)
+                if (ClientState.LocalPlayer is not null && _notSelf && ClientState.LocalPlayer.Name.TextValue == pName.TextValue)
                 { yes = false; }
                 //Check for blacklist settings
                 if (_blacklist.Contains(messageString))
@@ -62,7 +62,7 @@ namespace ChatTranslator
                 if (_tranMode == 0 || _tranMode == 1) isHandled = true;
                 
                 // is it Append (0), Replace (1), or additional (2)
-                _chatters.Add(new Chatter{Message = message, mode = _tranMode, Sender = sender, Type = type, Sent = false, SenderId = senderId});
+                _chatters.Enqueue(new Chatter{Message = message, mode = _tranMode, Sender = sender, Type = type, Sent = false, SenderId = senderId});
              
 
             }

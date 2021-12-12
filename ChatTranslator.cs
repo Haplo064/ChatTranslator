@@ -1,5 +1,5 @@
 ﻿// TODOS
-// Publish
+// Fix broken
 
 using System.Collections.Generic;
 using System.Data.SqlTypes;
@@ -15,6 +15,7 @@ using Dalamud.Game.Gui;
 using Dalamud.Game.Text;
 using Dalamud.Plugin;
 using Lumina.Excel.GeneratedSheets;
+using System.Collections.Concurrent;
 
 namespace ChatTranslator
 {
@@ -45,7 +46,8 @@ namespace ChatTranslator
         private List<int> _chosenLanguages;
         private List<XivChatType> _channels = new List<XivChatType>();
         private readonly List<string> _lastTranslations = new List<string>();
-        private List<Chatter> _chatters = new List<Chatter>();
+        private ConcurrentQueue<Chatter> _chatters = new ConcurrentQueue<Chatter>();
+        //private List<Chatter> _chatters = new List<Chatter>();
         private bool _chatEngine = true;
 
         private readonly List<XivChatType> _order = new List<XivChatType>
@@ -219,6 +221,12 @@ namespace ChatTranslator
             {
                 if(_chatters.Count>0)
                 {
+                    Chatter chat;
+                    _chatters.TryDequeue(out chat);
+                    chat.Sent = true;
+                    var tranSeString = Tran(chat.Message);
+                    Chat.PrintChat(new XivChatEntry { Message = tranSeString, Name = chat.Sender, Type = chat.Type, SenderId = chat.SenderId });
+                    /*
                     foreach (var chats in _chatters)
                     {
                         if (!chats.Sent)
@@ -232,11 +240,12 @@ namespace ChatTranslator
 
                     for (int i = _chatters.Count - 1; i > -1; i--)
                     {
-                        if (_chatters[i].Sent)
+                        if (_chatters. [i].Sent)
                         {
                             _chatters.RemoveAt(i);
                         }
                     }
+                    */
                 }
 
             }

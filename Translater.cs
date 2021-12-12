@@ -42,7 +42,7 @@ namespace ChatTranslator
             var lang = _codes[_languageInt];
             var url = "https://clients5.google.com/translate_a/t?client=dict-chrome-ex&sl=auto&tl=" + lang + "&q=" + text;
             var request = (HttpWebRequest)WebRequest.Create(url);
-            request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36";
+            request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36";
             //PluginLog.Log("SENDING");
             var requestResult = request.GetResponse();
             //PluginLog.Log("READING");
