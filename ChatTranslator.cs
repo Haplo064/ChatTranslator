@@ -222,31 +222,11 @@ namespace ChatTranslator
             {
                 if(_chatters.Count>0)
                 {
-                    Chatter chat;
-                    _chatters.TryDequeue(out chat);
+                    _chatters.TryDequeue(out Chatter chat);
                     chat.Sent = true;
                     var tranSeString = Tran(chat.Message);
                     Chat.PrintChat(new XivChatEntry { Message = tranSeString, Name = chat.Sender, Type = chat.Type, SenderId = chat.SenderId });
-                    /*
-                    foreach (var chats in _chatters)
-                    {
-                        if (!chats.Sent)
-                        {
-                            chats.Sent = true;
-                            var tranSeString = Tran(chats.Message);
-                            Chat.PrintChat(new XivChatEntry{Message = tranSeString, Name = chats.Sender, Type = chats.Type, SenderId = chats.SenderId});
-                        }
 
-                    }
-
-                    for (int i = _chatters.Count - 1; i > -1; i--)
-                    {
-                        if (_chatters. [i].Sent)
-                        {
-                            _chatters.RemoveAt(i);
-                        }
-                    }
-                    */
                 }
             }
         }

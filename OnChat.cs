@@ -25,16 +25,16 @@ namespace ChatTranslator
                 if (message.Payloads.Count < 2) { }
                 else if (message.Payloads[0].Type == PayloadType.UIForeground && message.Payloads[1].Type == PayloadType.UIForeground)
                 {
-                    PluginLog.Log("Caught loop A");
+                    //PluginLog.Log("Caught loop A");
                     run = false;
                 }
                 if (!run) return;
 
                 
                 var messageString = message.TextValue;
-                PluginLog.Log($"READING IN: {messageString}");
+                //PluginLog.Log($"READING IN: {messageString}");
                 var predictedLanguage = Lang(messageString);
-                PluginLog.Log($"PRED LANG: {predictedLanguage}");
+                //PluginLog.Log($"PRED LANG: {predictedLanguage}");
 
                 var yes = true;
                 var pos = Array.IndexOf(_codes, predictedLanguage);
@@ -64,7 +64,7 @@ namespace ChatTranslator
                 if (_tranMode == 0 || _tranMode == 1) isHandled = true;
 
                 // is it Append (0), Replace (1), or additional (2)
-                PluginLog.Log($"ADDING MESSAGE TO CHAT TRAN QUEUE.");
+                //PluginLog.Log($"ADDING MESSAGE TO CHAT TRAN QUEUE.");
                 _chatters.Enqueue(new Chatter{Message = message, mode = _tranMode, Sender = sender, Type = type, Sent = false, SenderId = senderId});
              
 

@@ -32,11 +32,11 @@ namespace ChatTranslator
 
         private static string Lang(string message)
         {
-            PluginLog.Log("LANG FUNC");
+            //PluginLog.Log("LANG FUNC");
             var languages = Identifier.Identify(message);
-            PluginLog.Log("L1");
+            //PluginLog.Log("L1");
             var mostCertainLanguage = languages.FirstOrDefault();
-            PluginLog.Log("L2");
+            //PluginLog.Log("L2");
             return mostCertainLanguage != null ? mostCertainLanguage.Item1.Iso639_2T : "The language could not be identified with an acceptable degree of certainty";
         }
 
@@ -46,52 +46,52 @@ namespace ChatTranslator
             var url = "https://clients5.google.com/translate_a/t?client=dict-chrome-ex&sl=auto&tl=" + lang + "&q=" + text;
             var request = (HttpWebRequest)WebRequest.Create(url);
             request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36";
-            PluginLog.Log("SENDING");
+            //PluginLog.Log("SENDING");
             var requestResult = request.GetResponse();
-            PluginLog.Log("READING");
+            //PluginLog.Log("READING");
             var reader = new StreamReader(requestResult.GetResponseStream() ?? throw new Exception());
             var read = reader.ReadToEnd();
             var parsed = JObject.Parse(read);
             var sentences = (JArray) parsed["sentences"];
             string trans = "";
-            PluginLog.Log($"PARSE LOOP ({sentences.Count})");
+            //PluginLog.Log($"PARSE LOOP ({sentences.Count})");
 
             var take = 0;
             try
             {
-                PluginLog.Log(sentences[sentences.Count-1]["src_translit"].ToString());
+                //PluginLog.Log(sentences[sentences.Count-1]["src_translit"].ToString());
                 take++;
-                PluginLog.Log("Translit");
+                //PluginLog.Log("Translit");
             }
             catch
             {
-                PluginLog.Log("No translit");
+                //PluginLog.Log("No translit");
             }
             for (int i = 0; i < sentences.Count-take; i++)
             {
-                PluginLog.Log(sentences[i]["trans"].ToString());
+                //PluginLog.Log(sentences[i]["trans"].ToString());
                 trans += sentences[i]["trans"].ToString();
             }
-            PluginLog.Log("PARSE LOOP DONE");
+            //PluginLog.Log("PARSE LOOP DONE");
 
             JValue src = null;
             try
             {
                 src = ((JValue)parsed["src"]);
-                PluginLog.Log(src.ToString());
+                //PluginLog.Log(src.ToString());
             }
             catch
             {
-                PluginLog.Log("No src");
+                //PluginLog.Log("No src");
             }
             
             Debug.Assert(trans != null, nameof(trans) + " != null");
             if (src != null && (src.ToString(CultureInfo.InvariantCulture) == lang || trans.ToString() == text))
             {
-                PluginLog.Log("LOOP XXX");
+                //PluginLog.Log("LOOP XXX");
                 return "LOOP";
             }
-            PluginLog.Log("RETURN");
+            //PluginLog.Log("RETURN");
             return trans;
         }
 
