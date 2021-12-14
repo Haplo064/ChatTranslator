@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using Dalamud.Game.Text;
 using ImGuiNET;
 using Num = System.Numerics;
@@ -181,7 +182,7 @@ namespace ChatTranslator
 
                 if (ImGui.Button("Buy Haplo a Hot Chocolate"))
                 {
-                    System.Diagnostics.Process.Start("https://ko-fi.com/haplo");
+                    Process.Start(new ProcessStartInfo { FileName = "https://ko-fi.com/haplo", UseShellExecute = true });
                 }
                 ImGui.PopStyleColor(3);
                 

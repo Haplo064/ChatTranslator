@@ -17,6 +17,7 @@ using Dalamud.Plugin;
 using Lumina.Excel.GeneratedSheets;
 using System.Collections.Concurrent;
 
+
 namespace ChatTranslator
 {
     public partial class ChatTranslator : IDalamudPlugin
