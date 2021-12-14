@@ -11,6 +11,7 @@ namespace ChatTranslator
 {
     public partial class ChatTranslator
     {
+
         private void Chat_OnChatMessage(XivChatType type, uint senderId, ref SeString sender, ref SeString message, ref bool isHandled)
         {
             try
